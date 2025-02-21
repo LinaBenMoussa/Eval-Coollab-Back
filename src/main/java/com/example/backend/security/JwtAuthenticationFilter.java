@@ -30,10 +30,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
             filterChain.doFilter(request, response);
             return;
         }
-        if ("/users/create".equals(requestPath)) {
+
+        if ("/parametres/jwt-secret".equals(requestPath)) {
             filterChain.doFilter(request, response);
             return;
         }
+
         extractTokenFromRequest(request)
                         .map(jwtDecoder::decode)
                         .map(jwtToPrincipleConverter::convert)

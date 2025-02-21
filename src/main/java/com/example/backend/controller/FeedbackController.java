@@ -20,12 +20,12 @@ public class FeedbackController {
         return feedbackService.createFeedback(feedbackDto);
     }
 
-    @GetMapping("/getbycollaborateur/{id}")
+    @GetMapping("/collaborateur/{id}")
     public List<Feedback> getFeedbackByCollaborateurId(@PathVariable Long id){
         return feedbackService.getFeedbackByIdCollaborateur(id);
     }
 
-    @GetMapping("/getbymanager/{id}")
+    @GetMapping("/manager/{id}")
     public List<Feedback> getFeedbackByManager(@PathVariable Long id){
         return feedbackService.getFeedbackByIdManager(id);
     }

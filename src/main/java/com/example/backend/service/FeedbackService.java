@@ -39,7 +39,7 @@ public class FeedbackService {
         feedback.setCollaborateur(collaborateur);
         feedback.setManager(manager);
         feedback.setType(feedbackDto.getType());
-        feedback.setDateFeedback(LocalDateTime.now());
+        feedback.setDate_feedback(LocalDateTime.now());
 
         return feedbackRepository.save(feedback);
     }
@@ -58,6 +58,11 @@ public class FeedbackService {
     public List<Feedback> getFeedbackByIdManager(Long managerId) {
         return feedbackRepository.findByManagerId(managerId);
     }
+
+    public List<Feedback> getFeedbackByManagerAndCollaborateur(Long managerId, Long collaborateurId) {
+        return feedbackRepository.findByManagerIdAndCollaborateurId(managerId, collaborateurId);
+    }
+
 
     public void deleteFeedback(Long id) {
         feedbackRepository.deleteById(id);

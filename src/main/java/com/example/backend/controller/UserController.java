@@ -19,7 +19,6 @@ public class UserController {
 
     @PostMapping("/create")
     public User createUser(@RequestBody CreateUserRequestDto user) {
-        System.out.println("dans controller");
         return userService.createUser(user.getNom(), user.getPrenom(),user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId());
     }
     @GetMapping("/byrole/{role}")
@@ -31,7 +30,4 @@ public class UserController {
     public List<User> getCollaboratorsByIdManager(@PathVariable Long id) {
         return userService.getCollaboratorsByIdManager(id);
     }
-
-
-
 }

@@ -46,7 +46,6 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(password);
         user.setPassword(hashedPassword);
 
-        // Vérification de la cohérence entre le rôle et le manager_id
         if ("COLLABORATEUR".equalsIgnoreCase(role)) {
             if (managerId == null) {
                 throw new ApplicationException("Un collaborateur doit obligatoirement avoir un manager.");
@@ -55,7 +54,7 @@ public class UserService {
                     .orElseThrow(() -> new ApplicationException("Le manager avec l'ID " + managerId + " n'existe pas."));
             user.setManager(manager);
         } else {
-            // Si le rôle est MANAGER ou ADMIN, alors managerId doit être null
+
             if (managerId != null) {
                 throw new ApplicationException("Un manager ou un admin ne peut pas avoir de manager.");
             }

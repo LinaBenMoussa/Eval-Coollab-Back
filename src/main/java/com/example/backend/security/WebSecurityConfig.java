@@ -35,8 +35,7 @@ public class WebSecurityConfig {
                 .and().formLogin().disable()
                 .authorizeHttpRequests(registry -> registry
                         .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/users/create").permitAll()
-                        .requestMatchers("/users/message").hasRole("ADMIN")
+                        .requestMatchers("/parametres/jwt-secret").permitAll()
                         .requestMatchers("/").permitAll()
                         .anyRequest().authenticated()
                 )

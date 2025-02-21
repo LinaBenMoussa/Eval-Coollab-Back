@@ -1,8 +1,7 @@
 package com.example.backend.entity;
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -15,42 +14,29 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "t_user")
-public class User {
-
+@Table(name = "t_conge")
+public class Conge {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false)
-    private String nom;
+    private LocalDateTime date_debut;
 
-    @Column(nullable = false)
-    private String prenom;
+    private LocalDateTime date_fin;
 
-    @Column(nullable = false, unique = true)
-    private String username;
+    private LocalDateTime date_demande;
 
-    @Column(nullable = false)
-    @Size(min = 6)
-    private String password;
+    private String type;
 
+    private String status;
 
-    @Column(nullable = false)
-    private String role;
-
-    @Column
-    private Long id_bitrix24;
-
-    @Column
-    private Long id_redmine;
+    private String commentaire;
 
     @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private User manager;
+    @JoinColumn(name = "collaborateur_id", nullable = false)
+    private User user;
 
     @CreatedDate
     private LocalDateTime createdDate;
@@ -63,8 +49,4 @@ public class User {
 
     @LastModifiedBy
     private String lastModifiedBy;
-
-
-
-
 }
