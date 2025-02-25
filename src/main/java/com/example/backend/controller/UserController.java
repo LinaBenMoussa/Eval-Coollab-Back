@@ -3,11 +3,8 @@ package com.example.backend.controller;
 import com.example.backend.dto.CreateUserRequestDto;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
-import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
 
 import java.util.List;
 import java.util.Optional;
