@@ -1,6 +1,5 @@
 package com.example.backend.repository;
 
-import com.example.backend.entity.Feedback;
 import com.example.backend.entity.SaisieTemps;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -66,7 +66,38 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User editUser(Long id, String nom, String prenom, String username, String password, String role, Long managerId, Long id_redmine, Long id_bitrix24) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException("Utilisateur non trouvé."));
 
+        if (nom != null && !nom.isEmpty()) user.setNom(nom);
+        if (prenom != null && !prenom.isEmpty()) user.setPrenom(prenom);
+        if (username != null && !username.isEmpty()) {
+            if (!username.equals(user.getUsername()) && userRepository.findByUsername(username).isPresent()) {
+                throw new ApplicationException("Le nom d'utilisateur '" + username + "' existe déjà.");
+            }
+            user.setUsername(username);
+        }
+        if (password != null && !password.isEmpty()) {
+            user.setPassword(passwordEncoder.encode(password));
+        }
+        if (role != null && !role.isEmpty()) user.setRole(role);
+        user.setId_redmine(id_redmine);
+        user.setId_bitrix24(id_bitrix24);
+
+        if ("COLLABORATEUR".equalsIgnoreCase(role)) {
+            if (managerId == null) {
+                throw new ApplicationException("Un collaborateur doit obligatoirement avoir un manager.");
+            }
+            User manager = userRepository.findById(managerId)
+                    .orElseThrow(() -> new ApplicationException("Le manager avec l'ID " + managerId + " n'existe pas."));
+            user.setManager(manager);
+        } else {
+            user.setManager(null);
+        }
+
+        return userRepository.save(user);
+    }
 
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
