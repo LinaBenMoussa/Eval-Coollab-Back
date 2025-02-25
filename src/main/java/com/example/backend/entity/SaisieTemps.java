@@ -19,7 +19,7 @@ import java.time.LocalTime;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "t_saisie_temps")
-public class Saisie_temps {
+public class SaisieTemps {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,6 +34,10 @@ public class Saisie_temps {
     private String activite;
 
     private String commentaire;
+
+    @ManyToOne
+    @JoinColumn(name = "collaborateur_id", nullable = false)
+    private User collaborateur;
 
     @ManyToOne
     @JoinColumn(name = "issue_id", nullable = false)

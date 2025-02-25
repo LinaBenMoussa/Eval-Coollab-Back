@@ -36,7 +36,7 @@ public class Conge {
 
     @ManyToOne
     @JoinColumn(name = "collaborateur_id", nullable = false)
-    private User user;
+    private User collaborateur;
 
     @CreatedDate
     private LocalDateTime createdDate;

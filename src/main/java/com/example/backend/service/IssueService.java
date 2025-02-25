@@ -8,6 +8,8 @@ import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,17 +45,37 @@ public class IssueService {
             throw new IllegalArgumentException("La date de début doit être avant la date fin.");
         }
 
+
         Issue issue = new Issue();
 
         issue.setTitre(request.getTitre());
         issue.setDate_debut(request.getDate_debut());
         issue.setDate_fin(request.getDate_fin());
         issue.setDate_echeance(request.getDate_echeance());
-        issue.setStatus(request.getStatus());
         issue.setType(request.getType());
         issue.setCollaborateur(collaborateur);
+        if (request.getDate_debut() != null && LocalDateTime.now().isBefore(request.getDate_debut())) {
+            issue.setStatus("A faire");
+        }else{
+        if (request.getDate_fin() != null) {
+            if (request.getDate_echeance() != null && request.getDate_echeance().isBefore(request.getDate_fin())) {
+                issue.setStatus("En retard");
+            } else {
+                issue.setStatus("Terminé");
+            }
+        } else {
+            if (request.getDate_echeance() != null && request.getDate_echeance().isBefore(LocalDateTime.now())) {
+                issue.setStatus("En retard");
+            } else {
+                issue.setStatus("En cours");
+            }
+        }}
 
         return issueRepository.save(issue);
+    }
+
+    public Optional<Issue> getIssueById(Long id){
+       return issueRepository.findById(id);
     }
 
 }

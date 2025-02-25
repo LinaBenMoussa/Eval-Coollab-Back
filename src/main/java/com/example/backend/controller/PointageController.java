@@ -20,8 +20,7 @@ public class PointageController {
     }
 
     @PostMapping
-    public Pointage createIssue(@RequestBody PointageRequestDto request) {
-        System.out.println("request"+request);
+    public Pointage createPointage(@RequestBody PointageRequestDto request) {
         return pointageService.createPointage(request);
     }
 }

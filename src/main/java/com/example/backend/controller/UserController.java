@@ -19,7 +19,7 @@ public class UserController {
 
     @PostMapping("/create")
     public User createUser(@RequestBody CreateUserRequestDto user) {
-        return userService.createUser(user.getNom(), user.getPrenom(),user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId());
+        return userService.createUser(user.getNom(), user.getPrenom(),user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId(), user.getId_redmine(), user.getId_redmine());
     }
     @GetMapping("/byrole/{role}")
     public List<User> getCollaborators(@PathVariable String role) {

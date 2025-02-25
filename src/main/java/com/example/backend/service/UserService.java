@@ -23,7 +23,7 @@ public class UserService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public User createUser(String nom, String prenom, String username, String password, String role, Long managerId) {
+    public User createUser(String nom, String prenom, String username, String password, String role, Long managerId,Long id_redmine,Long id_bitrix24) {
 
         if (nom == null || nom.isEmpty() ||
                 prenom == null || prenom.isEmpty() ||
@@ -42,6 +42,8 @@ public class UserService {
         user.setPrenom(prenom);
         user.setUsername(username);
         user.setRole(role);
+        user.setId_redmine(id_redmine);
+        user.setId_bitrix24(id_bitrix24);
 
         String hashedPassword = passwordEncoder.encode(password);
         user.setPassword(hashedPassword);

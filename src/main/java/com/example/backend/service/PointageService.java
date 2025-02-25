@@ -47,7 +47,7 @@ public class PointageService {
         if (request.getHeure_arrivee() != null && request.getHeure_depart() == null) {
             pointage.setStatus("En poste");
         } else if (request.getHeure_arrivee() != null && request.getHeure_depart() != null) {
-            pointage.setStatus("Absent");
+            pointage.setStatus("A quité");
         }
 
         return pointageRepository.save(pointage);
@@ -73,7 +73,7 @@ public class PointageService {
         if (request.getHeure_arrivee() != null && request.getHeure_depart() == null) {
             pointageExist.setStatus("En poste");
         } else if (request.getHeure_arrivee() != null && request.getHeure_depart() != null) {
-            pointageExist.setStatus("Absent");
+            pointageExist.setStatus("A quité");
         }
 
         // Sauvegarder le pointage mis à jour
