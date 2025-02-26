@@ -10,4 +10,5 @@ import java.util.List;
 public interface PointageRepository extends JpaRepository<Pointage, Long> {
     List<Pointage> findByCollaborateur_ManagerId(Long managerId);
 
+    List<Pointage> findByCollaborateur_Id(Long collaborateurId);
 }

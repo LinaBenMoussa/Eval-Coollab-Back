@@ -3,6 +3,7 @@ package com.example.backend.service;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ApplicationException;
 import com.example.backend.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -122,6 +123,20 @@ public class UserService {
 
 
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        Optional<User> userOptional = userRepository.findById(id);
+        if (!userOptional.isPresent()) {
+            throw new EntityNotFoundException("Utilisateur non trouvé avec l'id : " + id);
+        }
+        User user = userOptional.get();
+
+        if ("manager".equalsIgnoreCase(user.getRole())) {
+            List<User> collaborateurs = userRepository.findByManagerId(id);
+            for (User collaborateur : collaborateurs) {
+                collaborateur.setManager(null);
+            }
+            userRepository.saveAll(collaborateurs);
+        }
+
+        userRepository.delete(user);
     }
 }

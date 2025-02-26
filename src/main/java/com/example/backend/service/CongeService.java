@@ -22,6 +22,10 @@ public class CongeService {
         return congeRepository.findByCollaborateur_ManagerId(managerId);
     }
 
+    public List<Conge> getCongesByCollaborateurId(Long collaborateurId) {
+        return congeRepository.findByCollaborateur_Id(collaborateurId);
+    }
+
     public Conge createConge(CongeRequestDto request) {
         if (request.getCollaborateur_id() == null) {
             throw new IllegalArgumentException("L'ID du collaborateur est obligatoire.");

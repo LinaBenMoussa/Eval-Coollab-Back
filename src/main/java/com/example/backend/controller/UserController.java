@@ -4,7 +4,9 @@ import com.example.backend.dto.CreateUserRequestDto;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.function.EntityResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,5 +38,11 @@ public class UserController {
     @GetMapping("/{id}")
     public Optional<User> getUserById(@PathVariable Long id){
         return userService.getUserById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id){
+        userService.deleteUser(id);
+        return ResponseEntity.ok("Utilisateur supprimé avec succès");
     }
 }

@@ -78,5 +78,9 @@ public class IssueService {
        return issueRepository.findById(id);
     }
 
+    public List<Issue> getIssueByCollaborateurId(Long id){
+        return issueRepository.findByCollaborateur_Id(id);
+    }
+
 }
 

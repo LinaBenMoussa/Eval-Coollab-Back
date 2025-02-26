@@ -23,6 +23,10 @@ public class PointageService {
         return pointageRepository.findByCollaborateur_ManagerId(managerId);
     }
 
+    public List<Pointage> getPointagesByCollaborateurId(Long collaborateurId) {
+        return pointageRepository.findByCollaborateur_Id(collaborateurId);
+    }
+
     public Pointage createPointage(PointageRequestDto request) {
         if (request.getCollaborateur_id() == null) {
             throw new IllegalArgumentException("L'ID du collaborateur est obligatoire.");

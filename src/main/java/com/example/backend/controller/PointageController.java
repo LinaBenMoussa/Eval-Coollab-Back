@@ -19,6 +19,11 @@ public class PointageController {
        return pointageService.getPointagesByManagerId(managerId);
     }
 
+    @GetMapping("/collaborateur/{collaborateurId}")
+    public List<Pointage> getPointageByCollaborateur(@PathVariable Long collaborateurId){
+        return pointageService.getPointagesByCollaborateurId(collaborateurId);
+    }
+
     @PostMapping
     public Pointage createPointage(@RequestBody PointageRequestDto request) {
         return pointageService.createPointage(request);

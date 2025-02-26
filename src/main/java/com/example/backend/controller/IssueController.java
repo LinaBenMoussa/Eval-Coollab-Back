@@ -25,5 +25,10 @@ public class IssueController {
     public List<Issue> getIssuesByManagerId(@PathVariable Long managerId) {
         return issueService.getIssuesByManagerId(managerId);
     }
+
+    @GetMapping("/collaborateur/{collaborateurId}")
+    public List<Issue> getIssuesByCollaborateurId(@PathVariable Long collaborateurId) {
+        return issueService.getIssueByCollaborateurId(collaborateurId);
+    }
 }
 

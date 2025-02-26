@@ -19,6 +19,11 @@ public class CongeController {
         return congeService.getCongesByManagerId(managerId);
     }
 
+    @GetMapping("/collaborateur/{collaborateurId}")
+    public List<Conge> getCongeBycollaborateur(@PathVariable Long collaborateurId){
+        return congeService.getCongesByCollaborateurId(collaborateurId);
+    }
+
     @PostMapping
     public Conge createConge(@RequestBody CongeRequestDto request) {
         return congeService.createConge(request);
