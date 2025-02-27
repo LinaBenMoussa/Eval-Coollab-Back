@@ -16,8 +16,13 @@ public class SaisieTempsController {
     private SaisieTempsService saisieTempsService;
 
     @GetMapping("/issue/{id}")
-    public List<SaisieTemps> getFeedbackByManager(@PathVariable Long id){
-        return saisieTempsService.getFeedbackByIssueId(id);
+    public List<SaisieTemps> getSaisieByIssue(@PathVariable Long id){
+        return saisieTempsService.getSaisieByIssueId(id);
+    }
+
+    @GetMapping("/manager/{id}")
+    public List<SaisieTemps> getSaisieByManager(@PathVariable Long id){
+        return saisieTempsService.getSaisieByManagerId(id);
     }
 
     @PostMapping

@@ -22,7 +22,7 @@ public class SaisieTempsService {
     @Autowired
     private IssueService issueService;
 
-    public List<SaisieTemps> getFeedbackByIssueId(Long issueId) {
+    public List<SaisieTemps> getSaisieByIssueId(Long issueId) {
         return saisieTempsRepository.findByIssueId(issueId);
     }
 
@@ -43,5 +43,10 @@ public class SaisieTempsService {
         saisieTemps.setHeures(request.getHeures());
 
         return saisieTempsRepository.save(saisieTemps);
+    }
+
+
+    public List<SaisieTemps> getSaisieByManagerId(Long managerId) {
+        return saisieTempsRepository.findByCollaborateur_ManagerId(managerId);
     }
 }

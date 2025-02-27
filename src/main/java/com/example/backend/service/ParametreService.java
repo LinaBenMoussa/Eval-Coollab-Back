@@ -7,6 +7,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ParametreService {
 
@@ -14,6 +16,10 @@ public class ParametreService {
     private ParametreRepository parametreRepository;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public List<Parametre> getParametre() {
+        return parametreRepository.findAll();
+    }
 
     public String getJwtSecret() {
         return parametreRepository.findByCle("jwt_secret_key")
@@ -44,16 +50,12 @@ public class ParametreService {
     }
 
     public void setJwtExpiration(long expiration) {
-        Parametre existingParam = parametreRepository.findByCle("jwt_expiration").orElse(null);
-
+        Parametre existingParam = parametreRepository.findByCle("jwt_expiration").orElseThrow(() -> new RuntimeException("jwt_expiration non défini en base !"));
+        System.out.println("jwt : "+existingParam.getCle());
         if (existingParam != null) {
+            System.out.println("expiration"+expiration);
             existingParam.setValeur(String.valueOf(expiration));
             parametreRepository.save(existingParam);
-        } else {
-            Parametre newParam = new Parametre();
-            newParam.setCle("jwt_expiration");
-            newParam.setValeur(String.valueOf(expiration));
-            parametreRepository.save(newParam);
         }
     }
 }

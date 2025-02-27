@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface SaisieTempsRepository extends JpaRepository<SaisieTemps, Long> {
     List<SaisieTemps> findByIssueId(Long issueId);
+
+    List<SaisieTemps> findByCollaborateur_ManagerId(Long managerId);
 }

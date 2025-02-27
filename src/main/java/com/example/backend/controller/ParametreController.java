@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.ParametreDto;
 import com.example.backend.service.ParametreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,28 +13,21 @@ public class ParametreController {
     @Autowired
     private ParametreService parametreService;
 
-    @GetMapping("/jwt-secret")
-    public ResponseEntity<String> getJwtSecret() {
-        String secret = parametreService.getJwtSecret();
-        return ResponseEntity.ok(secret);
+    @GetMapping
+    public ResponseEntity<ParametreDto> getParametre() {
+        Long expiration = parametreService.getJwtExpiration();
+
+        ParametreDto responseDto = new ParametreDto(expiration);
+        return ResponseEntity.ok(responseDto);
     }
 
-    @PutMapping("/jwt-secret")
-    public ResponseEntity<String> setJwtSecret(@RequestBody String jwtSecret) {
-        parametreService.setJwtSecret(jwtSecret);
+    @PutMapping
+    public ResponseEntity<String> setParametre(@RequestBody ParametreDto param) {
+        parametreService.setJwtExpiration(param.getJwt_expiration());
         return ResponseEntity.ok("Clé JWT mise à jour");
     }
 
-    @GetMapping("/jwt-expiration")
-    public ResponseEntity<Long> getJwtExpiration() {
-        long expiration = parametreService.getJwtExpiration();
-        return ResponseEntity.ok(expiration);
-    }
 
-    @PutMapping("/jwt-expiration")
-    public ResponseEntity<String> setJwtExpiration(@RequestBody long expiration) {
-        parametreService.setJwtExpiration(expiration);
-        return ResponseEntity.ok("Expiration JWT mise à jour");
-    }
+
 }
 
