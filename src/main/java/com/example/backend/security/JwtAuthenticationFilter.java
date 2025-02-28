@@ -35,6 +35,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
             filterChain.doFilter(request, response);
             return;
         }
+        if ("/parametres/jwt-expiration".equals(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if ("/users/create".equals(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
 
         extractTokenFromRequest(request)
                         .map(jwtDecoder::decode)

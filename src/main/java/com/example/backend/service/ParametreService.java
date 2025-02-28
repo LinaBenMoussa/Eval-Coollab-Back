@@ -50,12 +50,15 @@ public class ParametreService {
     }
 
     public void setJwtExpiration(long expiration) {
-        Parametre existingParam = parametreRepository.findByCle("jwt_expiration").orElseThrow(() -> new RuntimeException("jwt_expiration non défini en base !"));
-        System.out.println("jwt : "+existingParam.getCle());
+        Parametre existingParam = parametreRepository.findByCle("jwt_expiration").orElse(null);
         if (existingParam != null) {
-            System.out.println("expiration"+expiration);
             existingParam.setValeur(String.valueOf(expiration));
-            parametreRepository.save(existingParam);
+            parametreRepository.save(existingParam);}
+        else {
+            Parametre newParam = new Parametre();
+            newParam.setCle("jwt_expiration");
+            newParam.setValeur(String.valueOf(expiration));
+            parametreRepository.save(newParam);
         }
     }
 }

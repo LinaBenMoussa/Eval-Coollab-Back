@@ -36,6 +36,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(registry -> registry
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/parametres/jwt-secret").permitAll()
+                        .requestMatchers("/parametres/jwt-expiration").permitAll()
+                        .requestMatchers("/users/create").permitAll()
                         .requestMatchers("/").permitAll()
                         .anyRequest().authenticated()
                 )

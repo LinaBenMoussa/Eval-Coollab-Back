@@ -27,6 +27,18 @@ public class ParametreController {
         return ResponseEntity.ok("Clé JWT mise à jour");
     }
 
+    @PutMapping("/jwt-secret")
+    public ResponseEntity<String> setSecretKey(@RequestBody String secret) {
+        parametreService.setJwtSecret(secret);
+        return ResponseEntity.ok("Clé JWT mise à jour");
+    }
+
+    @PutMapping("/jwt-expiration")
+    public ResponseEntity<String> setExpiration(@RequestBody Long expiration) {
+        parametreService.setJwtExpiration(expiration);
+        return ResponseEntity.ok("Clé JWT mise à jour");
+    }
+
 
 
 }
