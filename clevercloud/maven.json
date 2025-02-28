@@ -1,5 +1,5 @@
 {
   "deploy": {
-    "command": "mvn clean package"
+    "goal": "spring-boot:run"
   }
 }
