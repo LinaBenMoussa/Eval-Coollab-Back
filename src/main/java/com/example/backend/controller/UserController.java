@@ -2,13 +2,17 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.CreateUserRequestDto;
 import com.example.backend.entity.User;
+import com.example.backend.service.CollaborateurService;
 import com.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.function.EntityResponse;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -16,6 +20,9 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CollaborateurService collaborateurService;
 
     @PostMapping("/create")
     public User createUser(@RequestBody CreateUserRequestDto user) {
@@ -45,4 +52,18 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.ok("Utilisateur supprimé avec succès");
     }
+
+    @GetMapping("/collaborateur/stats/{collaborateurId}")
+    public Map<String, Object> getCollaborateurStats(
+            @PathVariable Long collaborateurId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        // Convertir LocalDate en java.sql.Date si nécessaire
+        java.sql.Date sqlStartDate = java.sql.Date.valueOf(startDate);
+        java.sql.Date sqlEndDate = java.sql.Date.valueOf(endDate);
+
+        return collaborateurService.getCollaborateurStats(collaborateurId, sqlStartDate, sqlEndDate);
+    }
+
 }

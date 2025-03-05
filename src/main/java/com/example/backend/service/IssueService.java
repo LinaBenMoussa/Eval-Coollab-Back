@@ -58,11 +58,7 @@ public class IssueService {
             issue.setStatus("A faire");
         }else{
         if (request.getDate_fin() != null) {
-            if (request.getDate_echeance() != null && request.getDate_echeance().isBefore(request.getDate_fin())) {
-                issue.setStatus("En retard");
-            } else {
                 issue.setStatus("Terminé");
-            }
         } else {
             if (request.getDate_echeance() != null && request.getDate_echeance().isBefore(LocalDateTime.now())) {
                 issue.setStatus("En retard");
