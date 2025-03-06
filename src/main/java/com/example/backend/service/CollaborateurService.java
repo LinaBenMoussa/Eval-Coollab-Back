@@ -15,9 +15,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+
+
 @Service
 public class CollaborateurService {
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -25,11 +26,15 @@ public class CollaborateurService {
         Map<String, Object> stats = new HashMap<>();
 
         SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withoutProcedureColumnMetaDataAccess() // Évite les problèmes de métadonnées
                 .withProcedureName("CalculateCollaborateurStats")
                 .declareParameters(
-                        new SqlParameter("collaborateur_id", Types.INTEGER),
-                        new SqlParameter("start_date", Types.DATE),         // Nouveau paramètre d'entrée
-                        new SqlParameter("end_date", Types.DATE),           // Nouveau paramètre d'entrée
+                        // On fait correspondre exactement les noms avec ceux de la procédure
+                        new SqlParameter("p_collaborateur_id", Types.INTEGER),
+                        new SqlParameter("start_date", Types.DATE),
+                        new SqlParameter("end_date", Types.DATE),
+
+                        // Paramètres de sortie
                         new SqlOutParameter("positive_rate", Types.FLOAT),
                         new SqlOutParameter("negative_rate", Types.FLOAT),
                         new SqlOutParameter("retard_rate", Types.FLOAT),
@@ -44,16 +49,18 @@ public class CollaborateurService {
                         new SqlOutParameter("task_completion_rate", Types.FLOAT),
                         new SqlOutParameter("daily_avg_working_hours", Types.FLOAT),
                         new SqlOutParameter("temps_moyen_retard", Types.FLOAT)
-                );
+                    );
 
-        SqlParameterSource in = new MapSqlParameterSource()
-                .addValue("collaborateur_id", collaborateurId)
-                .addValue("start_date", startDate)  // Passage de la date de début
-                .addValue("end_date", endDate);     // Passage de la date de fin
+        // On alimente les paramètres d'entrée en conservant les mêmes noms que dans la procédure
+        SqlParameterSource inParams = new MapSqlParameterSource()
+                .addValue("p_collaborateur_id", collaborateurId)
+                .addValue("start_date", startDate)
+                .addValue("end_date", endDate);
 
-        Map<String, Object> result = jdbcCall.execute(in);
+        // Exécution de la procédure
+        Map<String, Object> result = jdbcCall.execute(inParams);
 
-        // Transférer les résultats dans notre map
+        // Récupération des valeurs de sortie
         stats.put("positiveRate", result.get("positive_rate"));
         stats.put("negativeRate", result.get("negative_rate"));
         stats.put("retardRate", result.get("retard_rate"));
