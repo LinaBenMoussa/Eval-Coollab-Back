@@ -1,8 +1,8 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -11,49 +11,25 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "t_user")
-public class User {
-
-    private static final long serialVersionUID = 1L;
-
+@Table(name = "t_notification")
+@Entity
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false)
-    private String nom;
+    private String sujet;
 
-    @Column(nullable = false)
-    private String prenom;
-
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column
-    private String email;
-
-    @Column(nullable = false)
-    @Size(min = 6)
-    private String password;
-
-
-    @Column(nullable = false)
-    private String role;
-
-    @Column
-    private Long id_bitrix24;
-
-    @Column
-    private Long id_redmine;
+    private String contenu;
 
     @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private User manager;
+    @JoinColumn(name = "collaborateur_id", nullable = false)
+    private User collaborateur;
+
+    private LocalDateTime dateEnvoi;
 
     @CreatedDate
     private LocalDateTime createdDate;
@@ -66,8 +42,4 @@ public class User {
 
     @LastModifiedBy
     private String lastModifiedBy;
-
-
-
-
 }

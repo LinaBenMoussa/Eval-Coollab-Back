@@ -13,7 +13,7 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("https://evaluationcollaborateursfrontend.onrender.com");
+        config.addAllowedOrigin("http://localhost:3000");
 //        https://evaluationcollaborateursfrontend.onrender.com/
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");

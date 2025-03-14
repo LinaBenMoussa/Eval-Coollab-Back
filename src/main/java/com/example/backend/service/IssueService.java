@@ -2,8 +2,12 @@ package com.example.backend.service;
 
 import com.example.backend.dto.IssueRequestDto;
 import com.example.backend.entity.Issue;
+import com.example.backend.entity.Project;
+import com.example.backend.entity.Status;
 import com.example.backend.entity.User;
 import com.example.backend.repository.IssueRepository;
+import com.example.backend.repository.ProjectRepository;
+import com.example.backend.repository.StatusRepository;
 import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +25,11 @@ public class IssueService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private StatusRepository statusRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
 
     public List<Issue> getIssuesByManagerId(Long managerId) {
@@ -35,6 +44,11 @@ public class IssueService {
         User collaborateur = userRepository.findById(request.getCollaborateur_id())
                 .orElseThrow(() -> new IllegalArgumentException("Collaborateur introuvable avec l'ID : "+ request.getCollaborateur_id()));
 
+        Status status = statusRepository.findById(request.getStatus_id())
+                .orElseThrow(() -> new IllegalArgumentException("status introuvable avec l'ID : "+ request.getStatus_id()));
+
+        Project project = projectRepository.findById(request.getProject_id())
+                .orElseThrow(() -> new IllegalArgumentException("project introuvable avec l'ID : "+ request.getProject_id()));
 
         if (request.getDate_debut() != null && request.getDate_echeance() != null
                 && request.getDate_debut().isAfter(request.getDate_echeance())) {
@@ -48,24 +62,15 @@ public class IssueService {
 
         Issue issue = new Issue();
 
-        issue.setTitre(request.getTitre());
+        issue.setSujet(request.getTitre());
         issue.setDate_debut(request.getDate_debut());
         issue.setDate_fin(request.getDate_fin());
         issue.setDate_echeance(request.getDate_echeance());
         issue.setType(request.getType());
         issue.setCollaborateur(collaborateur);
-        if (request.getDate_debut() != null && LocalDateTime.now().isBefore(request.getDate_debut())) {
-            issue.setStatus("A faire");
-        }else{
-        if (request.getDate_fin() != null) {
-                issue.setStatus("Terminé");
-        } else {
-            if (request.getDate_echeance() != null && request.getDate_echeance().isBefore(LocalDateTime.now())) {
-                issue.setStatus("En retard");
-            } else {
-                issue.setStatus("En cours");
-            }
-        }}
+        issue.setStatus(status);
+        issue.setProject(project);
+
 
         return issueRepository.save(issue);
     }

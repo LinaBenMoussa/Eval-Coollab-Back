@@ -38,8 +38,5 @@ public class ParametreController {
         parametreService.setJwtExpiration(expiration);
         return ResponseEntity.ok("Clé JWT mise à jour");
     }
-
-
-
 }
 

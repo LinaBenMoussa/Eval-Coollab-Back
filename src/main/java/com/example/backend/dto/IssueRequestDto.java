@@ -16,7 +16,9 @@ public class IssueRequestDto {
 
     private LocalDateTime date_fin;
 
-    private String status;
+    private Long status_id;
+
+    private Long project_id;
 
     private String type;
 

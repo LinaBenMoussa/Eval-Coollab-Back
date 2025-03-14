@@ -67,7 +67,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User editUser(Long id, String nom, String prenom, String username, String password, String role, Long managerId, Long id_redmine, Long id_bitrix24) {
+    public User editUser(Long id, String nom, String prenom, String username, String password, String role, Long managerId,Long id_bitrix24, Long id_redmine ) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("Utilisateur non trouvé."));
 

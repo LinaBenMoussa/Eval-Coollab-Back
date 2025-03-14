@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,7 +29,7 @@ public class UserController {
     }
     @PutMapping
     public User updateUser(@RequestBody CreateUserRequestDto user) {
-        return userService.editUser(user.getId(),user.getNom(), user.getPrenom(),user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId(), user.getId_redmine(), user.getId_redmine());
+        return userService.editUser(user.getId(),user.getNom(), user.getPrenom(),user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId(), user.getId_bitrix24(), user.getId_redmine());
     }
     @GetMapping("/byrole/{role}")
     public List<User> getCollaborators(@PathVariable String role) {
@@ -56,14 +55,14 @@ public class UserController {
     @GetMapping("/collaborateur/stats/{collaborateurId}")
     public Map<String, Object> getCollaborateurStats(
             @PathVariable Long collaborateurId,
+            @RequestParam("type") String type,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
-        // Convertir LocalDate en java.sql.Date si nécessaire
         java.sql.Date sqlStartDate = java.sql.Date.valueOf(startDate);
         java.sql.Date sqlEndDate = java.sql.Date.valueOf(endDate);
 
-        return collaborateurService.getCollaborateurStats(collaborateurId, sqlStartDate, sqlEndDate);
+        return collaborateurService.getCollaborateurStats(collaborateurId, sqlStartDate, sqlEndDate,type);
     }
 
 }

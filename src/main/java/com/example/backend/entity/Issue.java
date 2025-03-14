@@ -22,7 +22,9 @@ public class Issue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String titre;
+    private String sujet;
+
+    private String description;
 
     private LocalDateTime date_debut;
 
@@ -30,13 +32,23 @@ public class Issue {
 
     private LocalDateTime date_echeance;
 
-    private String status;
+    private Double heures_estimees;
 
     private String type;
 
     @ManyToOne
-    @JoinColumn(name = "collaborateur_id", nullable = false)
+    @JoinColumn(name = "collaborateur_id")
     private User collaborateur;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private Status status;
+
+
 
     @CreatedDate
     private LocalDateTime createdDate;

@@ -12,7 +12,7 @@ public class SaisieTempsRequestDto {
 
     private LocalDate date;
 
-    private LocalTime heures;
+    private double heures;
 
     private String activite;
 
