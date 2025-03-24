@@ -16,5 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByManagerId(Long managerId);
 
+    User findByMatricule(String matricule);
+
 }
 

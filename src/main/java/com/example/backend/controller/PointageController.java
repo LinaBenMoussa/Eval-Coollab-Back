@@ -1,12 +1,16 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.PointageRequestDto;
+import com.example.backend.dto.PointageResponseDto;
+import com.example.backend.entity.Conge;
 import com.example.backend.entity.Pointage;
 import com.example.backend.service.PointageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,8 +25,8 @@ public class PointageController {
     }
 
     @GetMapping("/collaborateur/{collaborateurId}")
-    public List<Pointage> getPointageByCollaborateur(@PathVariable Long collaborateurId){
-        return pointageService.getPointagesByCollaborateurId(collaborateurId);
+    public List<Pointage> getPointageByCollaborateur(@PathVariable String matricule){
+        return pointageService.getPointagesByCollaborateurId(matricule);
     }
 
     @PostMapping
@@ -35,5 +39,21 @@ public class PointageController {
         LocalDate localDate = LocalDate.parse(date);
         pointageService.checkWorkHoursForAllCollaborateurs(localDate);
         return "Vérification des heures de travail pour tous les collaborateurs terminée.";
+    }
+
+    @GetMapping("/manager/{managerId}/{date}")
+    public List<Pointage> getPointagesByManagerAndDate(@PathVariable Long managerId, @PathVariable LocalDate date){
+        return pointageService.getPointagesByManagerAndDate(managerId, date);
+    }
+
+    @GetMapping("/filtre")
+    public PointageResponseDto getPointages(
+            @RequestParam Long managerId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "100") int limit
+    ) {
+        return pointageService.getPointagesByManagerId(managerId, startDate, endDate, offset, limit);
     }
 }

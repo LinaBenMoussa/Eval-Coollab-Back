@@ -20,6 +20,7 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 1000)
     private String commentaire;
 
     private LocalDateTime date_feedback;

@@ -24,6 +24,7 @@ public class Issue {
 
     private String sujet;
 
+    @Column(length = 2000)
     private String description;
 
     private LocalDateTime date_debut;

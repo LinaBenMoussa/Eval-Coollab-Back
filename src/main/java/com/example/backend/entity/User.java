@@ -9,14 +9,24 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "t_user")
-public class User {
+@Table(
+        name = "t_user",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username"),
+                @UniqueConstraint(columnNames = "matricule")
+        }
+)
+public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,13 +44,15 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column
+    @Column(nullable = false, unique = true)
+    private String matricule;
+
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
     @Size(min = 6)
     private String password;
-
 
     @Column(nullable = false)
     private String role;
@@ -56,6 +68,7 @@ public class User {
     private User manager;
 
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdDate;
 
     @CreatedBy
@@ -66,8 +79,4 @@ public class User {
 
     @LastModifiedBy
     private String lastModifiedBy;
-
-
-
-
 }

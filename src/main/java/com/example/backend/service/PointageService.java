@@ -2,12 +2,22 @@ package com.example.backend.service;
 
 import com.example.backend.dto.NotificationRequestDto;
 import com.example.backend.dto.PointageRequestDto;
+import com.example.backend.dto.PointageResponseDto;
+import com.example.backend.entity.Conge;
 import com.example.backend.entity.Pointage;
 import com.example.backend.entity.User;
 import com.example.backend.repository.PointageRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.specification.PointageSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -39,7 +49,7 @@ public class PointageService {
         List<User> collaborateurs = userRepository.findByRole("Collaborateur");
 
         for (User collaborateur : collaborateurs) {
-            List<Pointage> pointages = pointageRepository.findByCollaborateur_IdAndDate(collaborateur.getId(),date);
+            List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(collaborateur.getMatricule(),date);
 
             long totalHoursWorked = 0;
             for (Pointage pointage : pointages) {
@@ -55,8 +65,8 @@ public class PointageService {
             // Vérifier si les heures travaillées sont inférieures aux heures requises
             if (totalHoursWorked < REQUIRED_HOURS) {
                 String message = String.format(
-                        "Le collaborateur %s (ID: %d) n'a pas accompli ses heures de travail le %s. Heures travaillées : %d",
-                        collaborateur.getNom(), collaborateur.getId(), date, totalHoursWorked
+                        "Vous n'avez pas atteint vos heures quotidiennes pour le %s. Heures travaillées : %d",
+                        date, totalHoursWorked
                 );
 
                 // Envoyer une notification Bitrix24
@@ -75,8 +85,38 @@ public class PointageService {
         return pointageRepository.findByCollaborateur_ManagerId(managerId);
     }
 
-    public List<Pointage> getPointagesByCollaborateurId(Long collaborateurId) {
-        return pointageRepository.findByCollaborateur_Id(collaborateurId);
+    public List<Pointage> getPointagesByCollaborateurId(String matricule) {
+        return pointageRepository.findByCollaborateur_Matricule(matricule);
+    }
+
+
+
+    public PointageResponseDto getPointagesByManagerId(
+            Long managerId,
+            LocalDate startDate,
+            LocalDate endDate,
+            int offset,
+            int limit
+    ) {
+        // Créez une spécification pour les filtres
+        Specification<Pointage> spec = Specification.where(PointageSpecifications.hasManagerId(managerId));
+
+        // Ajoutez le filtre par plage de dates si les dates sont fournies
+        if (startDate != null && endDate != null) {
+            spec = spec.and(PointageSpecifications.isBetweenDates(startDate, endDate));
+        }
+
+        // Calculez le numéro de page à partir de l'offset et de la limite
+        int page = offset / limit;
+
+        // Appliquez la pagination
+        Pageable pageable = PageRequest.of(page, limit);
+
+        // Exécutez la requête avec les filtres et la pagination
+        Page<Pointage> result = pointageRepository.findAll(spec, pageable);
+
+        // Retournez la réponse avec la liste des pointages et le nombre total
+        return new PointageResponseDto(result.getContent(), result.getTotalElements());
     }
 
     public Pointage createPointage(PointageRequestDto request) {
@@ -136,6 +176,8 @@ public class PointageService {
         return pointageRepository.save(pointageExist);
     }
 
-
+    public List<Pointage> getPointagesByManagerAndDate(Long managerId, LocalDate date) {
+        return pointageRepository.findByCollaborateur_ManagerIdAndDate(managerId, date);
+    }
 
 }

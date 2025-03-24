@@ -8,7 +8,9 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Getter
@@ -22,20 +24,25 @@ public class Conge {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime date_debut;
+    @Column(name = "date_debut")
+    private LocalDateTime dateDebut;
 
-    private LocalDateTime date_fin;
+    @Column(name = "date_fin")
+    private LocalDateTime dateFin;
 
     private LocalDateTime date_demande;
 
     private String type;
 
-    private String status;
+    private LocalTime heureDeb;
 
-    private String commentaire;
+    private LocalTime heureFin;
+
+
+    private double nbrjour;
 
     @ManyToOne
-    @JoinColumn(name = "collaborateur_id", nullable = false)
+    @JoinColumn(name = "matricule", referencedColumnName = "matricule")
     private User collaborateur;
 
     @CreatedDate

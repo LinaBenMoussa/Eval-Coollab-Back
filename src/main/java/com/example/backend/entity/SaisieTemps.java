@@ -33,6 +33,7 @@ public class SaisieTemps {
 
     private String activite;
 
+    @Column(length = 1000)
     private String commentaire;
 
     @ManyToOne

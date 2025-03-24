@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Getter
 @Setter
 public class CongeRequestDto {
@@ -16,9 +18,12 @@ public class CongeRequestDto {
 
     private String type;
 
-    private String status;
+    private LocalTime heureDeb;
 
-    private String commentaire;
+    private LocalTime heureFin;
 
-    private Long collaborateur_id;
+
+    private double nbrjour;
+
+    private String matricule;
 }

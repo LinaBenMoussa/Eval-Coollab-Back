@@ -8,6 +8,8 @@ import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,12 +29,11 @@ public class CongeService {
     }
 
     public Conge createConge(CongeRequestDto request) {
-        if (request.getCollaborateur_id() == null) {
+        if (request.getMatricule() == null) {
             throw new IllegalArgumentException("L'ID du collaborateur est obligatoire.");
         }
 
-        User collaborateur = userRepository.findById(request.getCollaborateur_id())
-                .orElseThrow(() -> new IllegalArgumentException("Collaborateur introuvable avec l'ID : "+ request.getCollaborateur_id()));
+        User collaborateur = userRepository.findByMatricule(request.getMatricule());
 
         // Vérification si l'heure d'arrivée est après l'heure de départ
         if (request.getDate_debut() != null && request.getDate_fin() != null &&
@@ -41,14 +42,20 @@ public class CongeService {
         }
 
         Conge conge = new Conge();
-        conge.setDate_debut(request.getDate_debut());
-        conge.setDate_fin(request.getDate_fin());
+        conge.setDateDebut(request.getDate_debut());
+        conge.setDateFin(request.getDate_fin());
         conge.setDate_demande(request.getDate_demande());
         conge.setCollaborateur(collaborateur);
-        conge.setCommentaire(request.getCommentaire());
-        conge.setStatus(request.getStatus());
+        conge.setNbrjour(request.getNbrjour());
+        conge.setHeureDeb(request.getHeureDeb());
+        conge.setHeureFin(request.getHeureFin());
         conge.setType(request.getType());
 
         return congeRepository.save(conge);
     }
+    public List<Conge> getCongesByManagerAndDate(Long managerId, LocalDateTime date) {
+        return congeRepository.findByCollaborateur_ManagerIdAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(
+                managerId, date, date);
+    }
+
 }

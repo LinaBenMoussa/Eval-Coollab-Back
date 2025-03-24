@@ -31,8 +31,9 @@ public class Pointage {
     private LocalTime heure_depart;
 
     private String status;
+
     @ManyToOne
-    @JoinColumn(name = "collaborateur_id", nullable = false)
+    @JoinColumn(name = "matricule", referencedColumnName = "matricule")
     private User collaborateur;
 
     @CreatedDate

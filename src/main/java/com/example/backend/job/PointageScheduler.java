@@ -13,7 +13,7 @@ public class PointageScheduler {
     @Autowired
     private PointageService pointageService;
 
-    @Scheduled(cron = "0 08 22 * * ?")
+    @Scheduled(cron = "0 31 0 * * ?")
     public void checkWorkHoursDaily() {
         System.out.println("notif se declenche");
         LocalDate today = LocalDate.now();

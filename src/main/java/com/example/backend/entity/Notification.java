@@ -23,6 +23,7 @@ public class Notification {
 
     private String sujet;
 
+    @Column(length = 1000)
     private String contenu;
 
     @ManyToOne

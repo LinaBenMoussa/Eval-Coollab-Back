@@ -32,5 +32,10 @@ public class NotificationService {
     public List<Notification> getNotificationByIdCollaborateur(Long id){
         return notificationRepository.findByCollaborateur_Id(id);
     }
+    public void deleteNotification(Long id) {
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Notification introuvable avec l'ID : " + id));
+        notificationRepository.delete(notification);
+    }
 
 }

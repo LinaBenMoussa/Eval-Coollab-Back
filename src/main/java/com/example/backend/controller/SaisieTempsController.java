@@ -1,12 +1,15 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.ResponseSaisieTempsDto;
 import com.example.backend.dto.SaisieTempsRequestDto;
 import com.example.backend.entity.Feedback;
 import com.example.backend.entity.SaisieTemps;
 import com.example.backend.service.SaisieTempsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -25,8 +28,15 @@ public class SaisieTempsController {
         return saisieTempsService.getSaisieByManagerId(id);
     }
 
-    @PostMapping
-    public SaisieTemps createSaisieTemps(@RequestBody SaisieTempsRequestDto request){
-        return saisieTempsService.createSaisieTemps(request);
+    @GetMapping("/filtre")
+    public ResponseSaisieTempsDto getSaisies(
+            @RequestParam Long managerId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) Long collaborateurId,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        return saisieTempsService.getSaisiesByManagerId(managerId, startDate, endDate, collaborateurId, offset, limit);
     }
 }

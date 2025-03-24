@@ -6,6 +6,8 @@ import com.example.backend.service.CongeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,5 +29,10 @@ public class CongeController {
     @PostMapping
     public Conge createConge(@RequestBody CongeRequestDto request) {
         return congeService.createConge(request);
+    }
+
+    @GetMapping("/manager/{managerId}/{date}")
+    public List<Conge> getCongeBycollaborateur(@PathVariable Long managerId, @PathVariable LocalDateTime date){
+        return congeService.getCongesByManagerAndDate(managerId, date);
     }
 }
