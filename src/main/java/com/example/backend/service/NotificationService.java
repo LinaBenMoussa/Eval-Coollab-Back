@@ -30,12 +30,21 @@ public class NotificationService {
     }
 
     public List<Notification> getNotificationByIdCollaborateur(Long id){
-        return notificationRepository.findByCollaborateur_Id(id);
+        return notificationRepository.findByCollaborateur_IdOrderByCreatedDateDesc(id);
     }
     public void deleteNotification(Long id) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification introuvable avec l'ID : " + id));
         notificationRepository.delete(notification);
     }
+
+    public void markNotificationsAsRead(List<Long> notificationIds) {
+        List<Notification> notifications = notificationRepository.findAllById(notificationIds);
+        for (Notification notification : notifications) {
+            notification.setLu(true);
+        }
+        notificationRepository.saveAll(notifications);
+    }
+
 
 }

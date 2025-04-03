@@ -1,11 +1,9 @@
 package com.example.backend.specification;
 
 import com.example.backend.entity.Pointage;
+import com.example.backend.entity.SaisieTemps;
 import org.springframework.data.jpa.domain.Specification;
-
 import java.time.LocalDate;
-
-import org.springframework.data.jpa.domain.Specification;
 
 public class PointageSpecifications {
 
@@ -16,6 +14,14 @@ public class PointageSpecifications {
                     root.get("collaborateur").get("manager").get("id"),
                     managerId
             );
+        };
+    }
+    public static Specification<Pointage> hasCollaborateurId(Long collaborateurId) {
+        return (root, query, criteriaBuilder) -> {
+            if (collaborateurId == null) {
+                return criteriaBuilder.isTrue(criteriaBuilder.literal(true));
+            }
+            return criteriaBuilder.equal(root.get("collaborateur").get("id"), collaborateurId);
         };
     }
 

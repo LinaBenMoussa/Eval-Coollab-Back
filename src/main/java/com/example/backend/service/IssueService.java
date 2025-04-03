@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.IssueRequestDto;
+import com.example.backend.dto.response.IssueResponseDto;
 import com.example.backend.entity.Issue;
 import com.example.backend.entity.Project;
 import com.example.backend.entity.Status;
@@ -9,10 +10,18 @@ import com.example.backend.repository.IssueRepository;
 import com.example.backend.repository.ProjectRepository;
 import com.example.backend.repository.StatusRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.specification.IssueSpecifications;
+import com.example.backend.specification.PointageSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -36,51 +45,70 @@ public class IssueService {
         return issueRepository.findByCollaborateur_ManagerId(managerId);
     }
 
-    public Issue createIssue(IssueRequestDto request) {
-        if (request.getCollaborateur_id() == null) {
-            throw new IllegalArgumentException("L'ID du collaborateur est obligatoire.");
-        }
-
-        User collaborateur = userRepository.findById(request.getCollaborateur_id())
-                .orElseThrow(() -> new IllegalArgumentException("Collaborateur introuvable avec l'ID : "+ request.getCollaborateur_id()));
-
-        Status status = statusRepository.findById(request.getStatus_id())
-                .orElseThrow(() -> new IllegalArgumentException("status introuvable avec l'ID : "+ request.getStatus_id()));
-
-        Project project = projectRepository.findById(request.getProject_id())
-                .orElseThrow(() -> new IllegalArgumentException("project introuvable avec l'ID : "+ request.getProject_id()));
-
-        if (request.getDate_debut() != null && request.getDate_echeance() != null
-                && request.getDate_debut().isAfter(request.getDate_echeance())) {
-            throw new IllegalArgumentException("La date de début doit être avant la date d'échéance.");
-        }
-        if (request.getDate_debut() != null && request.getDate_fin() != null
-                && request.getDate_debut().isAfter(request.getDate_fin())) {
-            throw new IllegalArgumentException("La date de début doit être avant la date fin.");
-        }
-
-
-        Issue issue = new Issue();
-
-        issue.setSujet(request.getTitre());
-        issue.setDate_debut(request.getDate_debut());
-        issue.setDate_fin(request.getDate_fin());
-        issue.setDate_echeance(request.getDate_echeance());
-        issue.setType(request.getType());
-        issue.setCollaborateur(collaborateur);
-        issue.setStatus(status);
-        issue.setProject(project);
-
-
-        return issueRepository.save(issue);
-    }
-
     public Optional<Issue> getIssueById(Long id){
        return issueRepository.findById(id);
     }
 
     public List<Issue> getIssueByCollaborateurId(Long id){
         return issueRepository.findByCollaborateur_Id(id);
+    }
+
+    public IssueResponseDto getFilteredIssues(
+            Long managerId,
+            LocalDate startDateDebut,
+            LocalDate endDateDebut,
+            LocalDate startDateFin,
+            LocalDate endDateFin,
+            LocalDate startDateEcheance,
+            LocalDate endDateEcheance,
+            Long collaborateurId,
+            String status,
+            int offset,
+            int limit) {
+
+        Specification<Issue> spec = Specification.where(null);
+
+        // Filtre par manager
+        if (managerId != null) {
+            spec = spec.and(IssueSpecifications.hasManagerId(managerId));
+        }
+
+        // Filtre par collaborateur
+        if (collaborateurId != null) {
+            spec = spec.and(IssueSpecifications.hasCollaborateurId(collaborateurId));
+        }
+
+        // Filtre par status
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and(IssueSpecifications.hasStatus(status));
+        }
+
+        // Filtres par dates
+        if (startDateDebut != null && endDateDebut != null) {
+            spec = spec.and(IssueSpecifications.isBetweenDatesDebut(
+                    startDateDebut.atStartOfDay(),
+                    endDateDebut.atTime(23, 59, 59)));
+        }
+
+        if (startDateFin != null && endDateFin != null) {
+            spec = spec.and(IssueSpecifications.isBetweenDatesFin(
+                    startDateFin.atStartOfDay(),
+                    endDateFin.atTime(23, 59, 59)));
+        }
+
+        if (startDateEcheance != null && endDateEcheance != null) {
+            spec = spec.and(IssueSpecifications.isBetweenDatesEcheance(
+                    startDateEcheance.atStartOfDay(),
+                    endDateEcheance.atTime(23, 59, 59)));
+        }
+
+        // Pagination et tri
+        int page = offset / limit;
+        Pageable pageable = PageRequest.of(page, limit);
+
+        Page<Issue> result = issueRepository.findAll(spec, pageable);
+
+        return new IssueResponseDto(result.getContent(), result.getTotalElements());
     }
 
 }

@@ -15,9 +15,12 @@ public class EmployeeCardDTO {
     private LocalTime heureDepart;
     private String status;
     private String collaborateurNom;
-    private String congeType; // Type de congé (ex: "En congé", "Autorisation")
-    private boolean isLate; // Retard
-    private boolean completedWorkDay; // A fait ses heures
-    private double requiredHours; // Heures requises
+    private String congeType;
+    private boolean isLate;
+    private boolean completedWorkDay;
+    private double requiredHours;
     private double dureeAutorisation;
+    private LocalTime deb_Autorisation;
+    private LocalTime fin_Autorisation;
+
 }

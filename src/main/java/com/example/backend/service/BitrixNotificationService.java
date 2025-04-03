@@ -21,7 +21,6 @@ public class BitrixNotificationService {
                 "{\"USER_ID\": %d, \"MESSAGE\": \"%s\"}",
                 userId, message
         );
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 

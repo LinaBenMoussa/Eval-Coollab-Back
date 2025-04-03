@@ -99,11 +99,13 @@ public class EmployeeCardService {
             if ("Autorisation".equals(dto.getCongeType())) {
                 // Calculer la durée de l'autorisation
                 double dureeAutorisation = calculateDureeAutorisation(conge.getHeureDeb(), conge.getHeureFin());
-                dto.setDureeAutorisation(dureeAutorisation); // Stocker la durée de l'autorisation
+                dto.setDureeAutorisation(dureeAutorisation);
+                dto.setDeb_Autorisation(conge.getHeureDeb());
+                dto.setFin_Autorisation(conge.getHeureFin());
             }
         } else {
             dto.setCongeType(null);
-            dto.setDureeAutorisation(0); // Pas d'autorisation, durée à 0
+            dto.setDureeAutorisation(0);
         }
 
         // Calculer si le collaborateur est en retard

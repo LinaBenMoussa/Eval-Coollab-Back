@@ -49,7 +49,8 @@ public class Issue {
     @JoinColumn(name = "status_id")
     private Status status;
 
-
+    @Column(name = "is_expired", nullable = false)
+    private boolean isExpired = false;
 
     @CreatedDate
     private LocalDateTime createdDate;

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class CollaborateurService {
+public class CollaborateurStatsService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

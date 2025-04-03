@@ -26,4 +26,6 @@ public interface PointageRepository extends JpaRepository<Pointage, Long>, JpaSp
     List<Pointage> findByDateAndCollaborateur_ManagerId(LocalDate date, Long managerId);
 
 
+
+
 }

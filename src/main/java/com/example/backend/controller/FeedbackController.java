@@ -1,11 +1,15 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.FeedbackRequestDto;
+import com.example.backend.dto.response.FeedbackResponseDto;
 import com.example.backend.entity.Feedback;
 import com.example.backend.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -28,5 +32,25 @@ public class FeedbackController {
     @GetMapping("/manager/{id}")
     public List<Feedback> getFeedbackByManager(@PathVariable Long id){
         return feedbackService.getFeedbackByIdManager(id);
+    }
+
+    @GetMapping("/filtre")
+    public ResponseEntity<FeedbackResponseDto> filtreFeedback(
+            @RequestParam(required = false) Long collaborateurId,
+            @RequestParam(required = false) Long managerId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit) {
+
+        FeedbackResponseDto response = feedbackService.filtreFeedback(
+                collaborateurId,
+                managerId,
+                type,
+                startDate, endDate,
+                offset, limit);
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -6,6 +6,7 @@ import com.example.backend.dto.PointageResponseDto;
 import com.example.backend.entity.Conge;
 import com.example.backend.entity.Pointage;
 import com.example.backend.entity.User;
+import com.example.backend.repository.CongeRepository;
 import com.example.backend.repository.PointageRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.specification.PointageSpecifications;
@@ -15,9 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -43,13 +41,35 @@ public class PointageService {
     @Autowired
     private EmailService emailService;
 
-    private static final int REQUIRED_HOURS = 9; // Nombre d'heures de travail requises par jour
+    @Autowired
+    private CongeRepository congeRepository;
+
+    private static final int REQUIRED_HOURS = 9;
 
     public void checkWorkHoursForAllCollaborateurs(LocalDate date) {
         List<User> collaborateurs = userRepository.findByRole("Collaborateur");
 
         for (User collaborateur : collaborateurs) {
-            List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(collaborateur.getMatricule(),date);
+            List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(
+                    collaborateur.getMatricule(), date
+            );
+            LocalDate selectedDate=date;
+            String matricule=collaborateur.getMatricule();
+
+            Conge conge = congeRepository.findByCollaborateurAndDateRange(matricule, selectedDate);
+            long congeHours = 0;
+            long autorisationHours = 0;
+
+            if (conge != null) {
+                if ("CA".equals(conge.getType())) {
+                    congeHours = 9;
+                } else if ("A".equals(conge.getType())) {
+                    autorisationHours = Duration.between(conge.getHeureDeb(), conge.getHeureFin()).toHours();
+                }
+            }
+            System.out.println("conge : "+conge);
+
+            long requiredHoursAdjusted = Math.max(0, REQUIRED_HOURS - (congeHours + autorisationHours));
 
             long totalHoursWorked = 0;
             for (Pointage pointage : pointages) {
@@ -60,26 +80,28 @@ public class PointageService {
                     Duration duration = Duration.between(heureArrivee, heureDepart);
                     totalHoursWorked += duration.toHours();
                 }
+
             }
 
-            // Vérifier si les heures travaillées sont inférieures aux heures requises
-            if (totalHoursWorked < REQUIRED_HOURS) {
+            if (totalHoursWorked < requiredHoursAdjusted) {
                 String message = String.format(
-                        "Vous n'avez pas atteint vos heures quotidiennes pour le %s. Heures travaillées : %d",
-                        date, totalHoursWorked
+                        "Vous n'avez pas atteint vos heures quotidiennes pour le %s. Heures travaillées : %d/%d",
+                        date, totalHoursWorked, requiredHoursAdjusted
                 );
 
                 // Envoyer une notification Bitrix24
-                bitrixNotificationService.sendNotification(collaborateur.getId_bitrix24(), message);
+//                bitrixNotificationService.sendNotification(collaborateur.getId_bitrix24(), message);
 
                 String email = collaborateur.getEmail();
                 String subject = "Alerte : Heures de travail non accomplies";
-                emailService.sendEmail(email, subject, message);
+                if(email != null) {
+                    emailService.sendEmail("lina.b.moussa@gmail.com", subject, message);
+                }
+                LocalDateTime dateEnvoi = LocalDateTime.of(date, LocalTime.now());
+                notificationService.createNotification(new NotificationRequestDto(subject, message, collaborateur.getId(), dateEnvoi));
 
-                LocalDateTime dateEnvoi = LocalDateTime.of(date, LocalTime.of(17, 30));
-                notificationService.createNotification(new NotificationRequestDto(subject, message, collaborateur.getId(), dateEnvoi));            }
-        }
-    }
+            }
+    }}
 
     public List<Pointage> getPointagesByManagerId(Long managerId) {
         return pointageRepository.findByCollaborateur_ManagerId(managerId);
@@ -89,33 +111,36 @@ public class PointageService {
         return pointageRepository.findByCollaborateur_Matricule(matricule);
     }
 
-
-
     public PointageResponseDto getPointagesByManagerId(
             Long managerId,
             LocalDate startDate,
             LocalDate endDate,
+            Long collaborateurId,
             int offset,
             int limit
     ) {
-        // Créez une spécification pour les filtres
-        Specification<Pointage> spec = Specification.where(PointageSpecifications.hasManagerId(managerId));
+        Specification<Pointage> spec = Specification.where(null);
+
+        // Filtre par manager
+        if (managerId != null) {
+            spec = spec.and(PointageSpecifications.hasManagerId(managerId));
+        }
 
         // Ajoutez le filtre par plage de dates si les dates sont fournies
         if (startDate != null && endDate != null) {
             spec = spec.and(PointageSpecifications.isBetweenDates(startDate, endDate));
         }
 
-        // Calculez le numéro de page à partir de l'offset et de la limite
+        if (collaborateurId != null) {
+            spec = spec.and(PointageSpecifications.hasCollaborateurId(collaborateurId));
+        }
+
         int page = offset / limit;
 
-        // Appliquez la pagination
         Pageable pageable = PageRequest.of(page, limit);
 
-        // Exécutez la requête avec les filtres et la pagination
         Page<Pointage> result = pointageRepository.findAll(spec, pageable);
 
-        // Retournez la réponse avec la liste des pointages et le nombre total
         return new PointageResponseDto(result.getContent(), result.getTotalElements());
     }
 

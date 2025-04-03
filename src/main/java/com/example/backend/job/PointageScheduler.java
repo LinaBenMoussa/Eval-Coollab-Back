@@ -10,12 +10,15 @@ import java.time.LocalDate;
 @Component
 public class PointageScheduler {
 
-    @Autowired
-    private PointageService pointageService;
+    private final PointageService pointageService;
 
-    @Scheduled(cron = "0 31 0 * * ?")
+    @Autowired
+    public PointageScheduler(PointageService pointageService) {
+        this.pointageService = pointageService;
+    }
+
+    @Scheduled(cron = "0 00 20 * * ?")
     public void checkWorkHoursDaily() {
-        System.out.println("notif se declenche");
         LocalDate today = LocalDate.now();
         pointageService.checkWorkHoursForAllCollaborateurs(today);
     }

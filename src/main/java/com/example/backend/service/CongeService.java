@@ -1,11 +1,18 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.CongeRequestDto;
+import com.example.backend.dto.response.CongeResponseDto;
 import com.example.backend.entity.Conge;
 import com.example.backend.entity.User;
 import com.example.backend.repository.CongeRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.specification.CongeSpecifications;
+import com.example.backend.specification.IssueSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,34 +35,54 @@ public class CongeService {
         return congeRepository.findByCollaborateur_Id(collaborateurId);
     }
 
-    public Conge createConge(CongeRequestDto request) {
-        if (request.getMatricule() == null) {
-            throw new IllegalArgumentException("L'ID du collaborateur est obligatoire.");
-        }
-
-        User collaborateur = userRepository.findByMatricule(request.getMatricule());
-
-        // Vérification si l'heure d'arrivée est après l'heure de départ
-        if (request.getDate_debut() != null && request.getDate_fin() != null &&
-                request.getDate_debut().isAfter(request.getDate_fin())) {
-            throw new IllegalArgumentException("L'heure d'arrivée doit être avant l'heure de départ.");
-        }
-
-        Conge conge = new Conge();
-        conge.setDateDebut(request.getDate_debut());
-        conge.setDateFin(request.getDate_fin());
-        conge.setDate_demande(request.getDate_demande());
-        conge.setCollaborateur(collaborateur);
-        conge.setNbrjour(request.getNbrjour());
-        conge.setHeureDeb(request.getHeureDeb());
-        conge.setHeureFin(request.getHeureFin());
-        conge.setType(request.getType());
-
-        return congeRepository.save(conge);
-    }
     public List<Conge> getCongesByManagerAndDate(Long managerId, LocalDateTime date) {
         return congeRepository.findByCollaborateur_ManagerIdAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(
                 managerId, date, date);
+    }
+
+    public CongeResponseDto filtreConge(
+            String type,
+            LocalDate startDateDebut,
+            LocalDate endDateDebut,
+            LocalDate startDateFin,
+            LocalDate endDateFin,
+            LocalDate startDateDemande,
+            LocalDate endDateDemande,
+            Long collaborateurId,
+            Long managerId,
+            int offset,
+            int limit) {
+
+        Specification<Conge> spec = Specification.where(null);
+
+        if (collaborateurId != null) {
+            spec = spec.and(CongeSpecifications.hasCollaborateurId(collaborateurId));
+        }
+
+        if (managerId != null) {
+            spec = spec.and(CongeSpecifications.hasManagerId(managerId));
+        }
+
+        if (type != null && !type.isEmpty()) {
+            spec = spec.and(CongeSpecifications.hasType(type));
+        }
+
+        // Conversion des LocalDate en LocalDateTime pour les plages
+        if (startDateDebut != null && endDateDebut != null) {
+            spec = spec.and(CongeSpecifications.isBetweenDatesDebut(startDateDebut, endDateDebut));
+        }
+        if (startDateFin != null && endDateFin != null) {
+            spec = spec.and(CongeSpecifications.isBetweenDatesFin(startDateFin, endDateFin));
+        }
+        if (startDateDemande != null && endDateDemande != null) {
+            spec = spec.and(CongeSpecifications.isBetweenDatesDemande(startDateDemande, endDateDemande));
+        }
+
+        // Pagination
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Page<Conge> result = congeRepository.findAll(spec, pageable);
+
+        return new CongeResponseDto(result.getContent(), result.getTotalElements());
     }
 
 }

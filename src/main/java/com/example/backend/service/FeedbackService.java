@@ -1,13 +1,20 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.FeedbackRequestDto;
+import com.example.backend.dto.response.FeedbackResponseDto;
 import com.example.backend.entity.Feedback;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ApplicationException;
 import com.example.backend.repository.FeedbackRepository;
+import com.example.backend.specification.FeedbackSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -66,5 +73,38 @@ public class FeedbackService {
 
     public void deleteFeedback(Long id) {
         feedbackRepository.deleteById(id);
+    }
+
+    public FeedbackResponseDto filtreFeedback(
+            Long collaborateurId,
+            Long managerId,
+            String type,
+            LocalDate startDate,
+            LocalDate endDate,
+            int offset,
+            int limit) {
+
+        Specification<Feedback> spec = Specification.where(null);
+
+        if (collaborateurId != null) {
+            spec = spec.and(FeedbackSpecifications.hasCollaborateurId(collaborateurId));
+        }
+
+        if (managerId != null) {
+            spec = spec.and(FeedbackSpecifications.hasManagerId(managerId));
+        }
+
+        if (type != null && !type.isEmpty()) {
+            spec = spec.and(FeedbackSpecifications.hasType(type));
+        }
+
+        if (startDate != null && endDate != null) {
+            spec = spec.and(FeedbackSpecifications.isBetweenDatesFeedback(startDate, endDate));
+        }
+
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Page<Feedback> result = feedbackRepository.findAll(spec, pageable);
+
+        return new FeedbackResponseDto(result.getContent(), result.getTotalElements());
     }
 }

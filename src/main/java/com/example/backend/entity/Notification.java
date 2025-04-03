@@ -26,6 +26,9 @@ public class Notification {
     @Column(length = 1000)
     private String contenu;
 
+    @Column
+    private boolean lu;
+
     @ManyToOne
     @JoinColumn(name = "collaborateur_id", nullable = false)
     private User collaborateur;

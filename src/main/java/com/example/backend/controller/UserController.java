@@ -2,7 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.CreateUserRequestDto;
 import com.example.backend.entity.User;
-import com.example.backend.service.CollaborateurService;
+import com.example.backend.service.CollaborateurStatsService;
 import com.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,7 +21,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private CollaborateurService collaborateurService;
+    private CollaborateurStatsService collaborateurService;
 
     @PostMapping("/create")
     public User createUser(@RequestBody CreateUserRequestDto user) {

@@ -1,11 +1,11 @@
 package com.example.backend.controller;
-
-import com.example.backend.dto.CongeRequestDto;
+import com.example.backend.dto.response.CongeResponseDto;
 import com.example.backend.entity.Conge;
 import com.example.backend.service.CongeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,13 +26,38 @@ public class CongeController {
         return congeService.getCongesByCollaborateurId(collaborateurId);
     }
 
-    @PostMapping
-    public Conge createConge(@RequestBody CongeRequestDto request) {
-        return congeService.createConge(request);
-    }
-
     @GetMapping("/manager/{managerId}/{date}")
     public List<Conge> getCongeBycollaborateur(@PathVariable Long managerId, @PathVariable LocalDateTime date){
         return congeService.getCongesByManagerAndDate(managerId, date);
+    }
+
+    @GetMapping("/filtre")
+    public ResponseEntity<CongeResponseDto> filtreConge(
+            @RequestParam(required = false) Long managerId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDateDebut,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDateDebut,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDateFin,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDateFin,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDateDemande,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDateDemande,
+            @RequestParam(required = false) Long collaborateurId,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit) {
+
+        CongeResponseDto response = congeService.filtreConge(
+                type,
+                startDateDebut,
+                endDateDebut,
+                startDateFin,
+                endDateFin,
+                startDateDemande,
+                endDateDemande,
+                collaborateurId,
+                managerId,
+                offset,
+                limit);
+
+        return ResponseEntity.ok(response);
     }
 }

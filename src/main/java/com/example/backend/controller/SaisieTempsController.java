@@ -30,7 +30,7 @@ public class SaisieTempsController {
 
     @GetMapping("/filtre")
     public ResponseSaisieTempsDto getSaisies(
-            @RequestParam Long managerId,
+            @RequestParam(required = false) Long managerId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) Long collaborateurId,

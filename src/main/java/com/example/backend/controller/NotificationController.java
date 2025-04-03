@@ -1,6 +1,5 @@
 package com.example.backend.controller;
 
-import com.example.backend.entity.Issue;
 import com.example.backend.entity.Notification;
 import com.example.backend.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,5 +24,12 @@ public class NotificationController {
         notificationService.deleteNotification(id);
         return "Notification supprimée avec succès !";
     }
+
+    @PutMapping("/lu")
+    public String markNotificationsAsRead(@RequestBody List<Long> notificationIds) {
+        notificationService.markNotificationsAsRead(notificationIds);
+        return "Notifications marquées comme lues avec succès !";
+    }
+
 
 }
