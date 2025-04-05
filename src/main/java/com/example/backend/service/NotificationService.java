@@ -5,7 +5,6 @@ import com.example.backend.entity.Notification;
 import com.example.backend.entity.User;
 import com.example.backend.repository.NotificationRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

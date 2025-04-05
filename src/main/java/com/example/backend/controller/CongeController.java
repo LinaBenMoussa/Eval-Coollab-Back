@@ -3,7 +3,6 @@ import com.example.backend.dto.response.CongeResponseDto;
 import com.example.backend.entity.Conge;
 import com.example.backend.service.CongeService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

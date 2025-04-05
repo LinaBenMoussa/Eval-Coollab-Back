@@ -5,7 +5,6 @@ import com.example.backend.exception.ApplicationException;
 import com.example.backend.security.JwtIssuer;
 import com.example.backend.security.UserPrinciple;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;

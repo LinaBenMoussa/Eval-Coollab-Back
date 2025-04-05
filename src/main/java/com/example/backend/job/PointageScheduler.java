@@ -2,7 +2,6 @@ package com.example.backend.job;
 
 import com.example.backend.service.PointageService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

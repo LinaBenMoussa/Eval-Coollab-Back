@@ -1,7 +1,6 @@
 package com.example.backend.specification;
 
 import com.example.backend.entity.Issue;
-import com.example.backend.entity.Pointage;
 import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDateTime;
 

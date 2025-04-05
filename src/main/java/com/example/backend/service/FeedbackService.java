@@ -8,7 +8,6 @@ import com.example.backend.exception.ApplicationException;
 import com.example.backend.repository.FeedbackRepository;
 import com.example.backend.specification.FeedbackSpecifications;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

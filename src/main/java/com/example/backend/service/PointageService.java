@@ -11,7 +11,6 @@ import com.example.backend.repository.PointageRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.specification.PointageSpecifications;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

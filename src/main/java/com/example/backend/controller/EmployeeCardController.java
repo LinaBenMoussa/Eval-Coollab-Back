@@ -3,7 +3,6 @@ package com.example.backend.controller;
 import com.example.backend.dto.EmployeeCardDTO;
 import com.example.backend.service.EmployeeCardService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
