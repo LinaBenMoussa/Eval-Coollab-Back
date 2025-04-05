@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 public class IssueSpecifications {
 
-    // Filtre par ID du manager
     public static Specification<Issue> hasManagerId(Long managerId) {
         return (root, query, cb) ->
                 cb.equal(root.get("collaborateur").get("manager").get("id"), managerId);
@@ -31,19 +30,16 @@ public class IssueSpecifications {
         };
     }
 
-    // Filtre par date_debut entre deux dates
     public static Specification<Issue> isBetweenDatesDebut(LocalDateTime start, LocalDateTime end) {
         return (root, query, cb) ->
                 cb.between(root.get("date_debut"), start, end);
     }
 
-    // Filtre par date_fin entre deux dates
     public static Specification<Issue> isBetweenDatesFin(LocalDateTime start, LocalDateTime end) {
         return (root, query, cb) ->
                 cb.between(root.get("date_fin"), start, end);
     }
 
-    // Filtre par date_echeance entre deux dates
     public static Specification<Issue> isBetweenDatesEcheance(LocalDateTime start, LocalDateTime end) {
         return (root, query, cb) ->
                 cb.between(root.get("date_echeance"), start, end);

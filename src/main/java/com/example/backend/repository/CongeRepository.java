@@ -1,12 +1,10 @@
 package com.example.backend.repository;
 
 import com.example.backend.entity.Conge;
-import com.example.backend.entity.Issue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

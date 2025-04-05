@@ -15,13 +15,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Data
+@AllArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtIssuer jwtIssuer;
+    private final JwtIssuer jwtIssuer;
 
     public LoginResponseDto attemptLogin(String email, String password) {
         try {

@@ -4,6 +4,7 @@ import com.example.backend.dto.FeedbackRequestDto;
 import com.example.backend.dto.response.FeedbackResponseDto;
 import com.example.backend.entity.Feedback;
 import com.example.backend.service.FeedbackService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/feedback")
+@AllArgsConstructor
 public class FeedbackController {
 
-    @Autowired
-    private FeedbackService feedbackService;
+    private final FeedbackService feedbackService;
 
     @PostMapping("/create")
     public Feedback createFeedback(@RequestBody FeedbackRequestDto feedbackDto) {

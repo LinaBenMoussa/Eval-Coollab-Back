@@ -4,18 +4,17 @@ import com.example.backend.dto.NotificationRequestDto;
 import com.example.backend.entity.Notification;
 import com.example.backend.entity.User;
 import com.example.backend.repository.NotificationRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class NotificationService {
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final UserService userService;
+    private final NotificationRepository notificationRepository;
 
     public Notification createNotification(NotificationRequestDto request) {
         User collaborateur = userService.getUserById(request.getCollaborateur_id())

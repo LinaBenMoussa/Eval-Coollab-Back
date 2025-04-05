@@ -1,21 +1,17 @@
 package com.example.backend.job;
 
 import com.example.backend.service.SaisieTempsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
+@AllArgsConstructor
 @Component
 public class SaisieTempsScheduler {
 
     private final SaisieTempsService saisieTempsService;
-
-    @Autowired
-    public SaisieTempsScheduler(SaisieTempsService saisieTempsService) {
-        this.saisieTempsService = saisieTempsService;
-    }
 
     @Scheduled(cron = "0 09 17 * * ?")
     public void checkSaisieTemps() {

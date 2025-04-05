@@ -4,6 +4,7 @@ import com.example.backend.dto.CreateUserRequestDto;
 import com.example.backend.entity.User;
 import com.example.backend.service.CollaborateurStatsService;
 import com.example.backend.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +17,9 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(("/users"))
+@AllArgsConstructor
 public class UserController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     private CollaborateurStatsService collaborateurService;

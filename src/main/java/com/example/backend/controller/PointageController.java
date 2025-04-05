@@ -2,22 +2,20 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.PointageRequestDto;
 import com.example.backend.dto.PointageResponseDto;
-import com.example.backend.entity.Conge;
 import com.example.backend.entity.Pointage;
 import com.example.backend.service.PointageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/pointages")
+@AllArgsConstructor
 public class PointageController {
-    @Autowired
-    private PointageService pointageService;
+    private final PointageService pointageService;
 
     @GetMapping("/manager/{managerId}")
     public List<Pointage> getPointageByManager(@PathVariable Long managerId){

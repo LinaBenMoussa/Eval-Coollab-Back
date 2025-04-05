@@ -10,6 +10,7 @@ import com.example.backend.repository.CongeRepository;
 import com.example.backend.repository.PointageRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.specification.PointageSpecifications;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,26 +24,21 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class PointageService {
 
-    @Autowired
-    private PointageRepository pointageRepository;
+    private final PointageRepository pointageRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
-    @Autowired
-    private BitrixNotificationService bitrixNotificationService;
+    private final BitrixNotificationService bitrixNotificationService;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
-    @Autowired
-    private CongeRepository congeRepository;
+    private final CongeRepository congeRepository;
 
     private static final int REQUIRED_HOURS = 9;
 

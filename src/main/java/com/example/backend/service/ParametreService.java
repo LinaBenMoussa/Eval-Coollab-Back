@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.entity.Parametre;
 import com.example.backend.repository.ParametreRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,11 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class ParametreService {
 
-    @Autowired
-    private ParametreRepository parametreRepository;
+    private final ParametreRepository parametreRepository;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 

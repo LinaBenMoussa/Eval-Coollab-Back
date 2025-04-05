@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -15,15 +15,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@AllArgsConstructor
 public class CollaborateurStatsService {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     public Map<String, Object> getCollaborateurStats(Long collaborateurId, Date startDate, Date endDate, String periodType) {
         Map<String, Object> stats = new HashMap<>();
 
-        // Appel de la procédure CalculateCollaborateurStats pour les statistiques détaillées
         SimpleJdbcCall statsCall = new SimpleJdbcCall(jdbcTemplate)
                 .withoutProcedureColumnMetaDataAccess()
                 .withProcedureName("CalculateCollaborateurStats")
@@ -47,16 +46,13 @@ public class CollaborateurStatsService {
                         new SqlOutParameter("temps_moyen_retard", Types.FLOAT)
                 );
 
-        // Paramètres d'entrée pour CalculateCollaborateurStats
         SqlParameterSource statsParams = new MapSqlParameterSource()
                 .addValue("p_collaborateur_id", collaborateurId)
                 .addValue("start_date", startDate)
                 .addValue("end_date", endDate);
 
-        // Exécution de CalculateCollaborateurStats
         Map<String, Object> statsResult = statsCall.execute(statsParams);
 
-        // Ajout des statistiques détaillées à la Map
         stats.put("positiveRate", statsResult.get("positive_rate"));
         stats.put("negativeRate", statsResult.get("negative_rate"));
         stats.put("retardRate", statsResult.get("retard_rate"));
@@ -72,7 +68,6 @@ public class CollaborateurStatsService {
         stats.put("dailyAvgWorkingHours", statsResult.get("daily_avg_working_hours"));
         stats.put("tempsMoyenRetard", statsResult.get("temps_moyen_retard"));
 
-        // Appel de la procédure CalculateProductivityCurve pour la courbe de productivité
         SimpleJdbcCall curveCall = new SimpleJdbcCall(jdbcTemplate)
                 .withoutProcedureColumnMetaDataAccess()
                 .withProcedureName("CalculateProductivityCurve")
@@ -85,17 +80,14 @@ public class CollaborateurStatsService {
                         new SqlOutParameter("period_labels", Types.VARCHAR)        // JSON
                 );
 
-        // Paramètres d'entrée pour CalculateProductivityCurve
         SqlParameterSource curveParams = new MapSqlParameterSource()
                 .addValue("p_collaborateur_id", collaborateurId)
                 .addValue("start_date", startDate)
                 .addValue("end_date", endDate)
                 .addValue("period_type", periodType);
 
-        // Exécution de CalculateProductivityCurve
         Map<String, Object> curveResult = curveCall.execute(curveParams);
 
-        // Ajout de la courbe de productivité à la Map
         stats.put("productivityScores", curveResult.get("productivity_scores"));
         stats.put("periodLabels", curveResult.get("period_labels"));
 

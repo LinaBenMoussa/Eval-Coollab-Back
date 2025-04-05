@@ -4,6 +4,7 @@ import com.example.backend.dto.IssueRequestDto;
 import com.example.backend.dto.response.IssueResponseDto;
 import com.example.backend.entity.Issue;
 import com.example.backend.service.IssueService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +16,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/issues")
+@AllArgsConstructor
 public class IssueController {
 
-    @Autowired
-    private IssueService issueService;
+    private final IssueService issueService;
 
     @GetMapping("/manager/{managerId}")
     public List<Issue> getIssuesByManagerId(@PathVariable Long managerId) {

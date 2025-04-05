@@ -29,7 +29,6 @@ public class CongeSpecifications {
         };
     }
 
-    // Filtre par type de congé
     public static Specification<Conge> hasType(String type) {
         return (root, query, cb) ->
                 cb.equal(root.get("type"), type);

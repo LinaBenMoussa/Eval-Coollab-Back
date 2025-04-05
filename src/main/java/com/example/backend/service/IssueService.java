@@ -1,44 +1,33 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.IssueRequestDto;
 import com.example.backend.dto.response.IssueResponseDto;
 import com.example.backend.entity.Issue;
-import com.example.backend.entity.Project;
-import com.example.backend.entity.Status;
-import com.example.backend.entity.User;
 import com.example.backend.repository.IssueRepository;
 import com.example.backend.repository.ProjectRepository;
 import com.example.backend.repository.StatusRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.specification.IssueSpecifications;
-import com.example.backend.specification.PointageSpecifications;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@AllArgsConstructor
 @Service
 public class IssueService {
-    @Autowired
-    private IssueRepository issueRepository;
+    private final IssueRepository issueRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private StatusRepository statusRepository;
+    private final StatusRepository statusRepository;
 
-    @Autowired
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
 
     public List<Issue> getIssuesByManagerId(Long managerId) {

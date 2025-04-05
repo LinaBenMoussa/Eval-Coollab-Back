@@ -7,7 +7,7 @@ import com.example.backend.entity.User;
 import com.example.backend.repository.SaisieTempsRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.specification.SaisieTempsSpecifications;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,26 +18,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class SaisieTempsService {
 
-    @Autowired
-    private SaisieTempsRepository saisieTempsRepository;
+    private final SaisieTempsRepository saisieTempsRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private IssueService issueService;
+    private final NotificationService notificationService;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     public List<SaisieTemps> getSaisieByIssueId(Long issueId) {
         return saisieTempsRepository.findByIssueId(issueId);

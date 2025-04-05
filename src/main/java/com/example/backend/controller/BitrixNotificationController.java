@@ -2,18 +2,18 @@ package com.example.backend.controller;
 
 import com.example.backend.service.BitrixNotificationService;
 import com.example.backend.service.EmailService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/notifications")
+@AllArgsConstructor
 public class BitrixNotificationController {
 
-    @Autowired
-    private BitrixNotificationService bitrixNotificationService;
+    private final BitrixNotificationService bitrixNotificationService;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @PostMapping("/send")
     public String sendNotification(
@@ -22,10 +22,8 @@ public class BitrixNotificationController {
             @RequestParam String email) {
 
         try {
-            // 1️⃣ Envoyer la notification Bitrix24
             bitrixNotificationService.sendNotification(userId, message);
 
-            // 2️⃣ Envoyer l'e-mail
             String subject = "Nouvelle Notification Bitrix24";
             emailService.sendEmail(email, subject, message);
 

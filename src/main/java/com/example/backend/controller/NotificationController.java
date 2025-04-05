@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.entity.Notification;
 import com.example.backend.service.NotificationService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,10 +10,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/notification")
+@AllArgsConstructor
 public class NotificationController {
 
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
     @GetMapping("/collaborateur/{collaborateurId}")
     public List<Notification> getNotificationByIdCollaborateur(@PathVariable Long collaborateurId) {

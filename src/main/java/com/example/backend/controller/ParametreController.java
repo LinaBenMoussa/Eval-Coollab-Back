@@ -2,16 +2,17 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.ParametreDto;
 import com.example.backend.service.ParametreService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/parametres")
+@AllArgsConstructor
 public class ParametreController {
 
-    @Autowired
-    private ParametreService parametreService;
+    private final ParametreService parametreService;
 
     @GetMapping
     public ResponseEntity<ParametreDto> getParametre() {

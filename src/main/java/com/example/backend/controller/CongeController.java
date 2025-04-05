@@ -2,6 +2,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.response.CongeResponseDto;
 import com.example.backend.entity.Conge;
 import com.example.backend.service.CongeService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/conges")
+@AllArgsConstructor
 public class CongeController {
-    @Autowired
-    private CongeService congeService;
+    private final CongeService congeService;
 
     @GetMapping("/manager/{managerId}")
     public List<Conge> getCongeByManager(@PathVariable Long managerId){

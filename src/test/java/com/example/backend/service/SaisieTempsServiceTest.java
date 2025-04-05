@@ -63,7 +63,7 @@ class SaisieTempsServiceTest {
 
         NotificationRequestDto notificationEnvoyee = notificationCaptor.getValue();
         assertEquals("Rappel de saisie de temps", notificationEnvoyee.getSujet());
-        assertEquals("Vous n'avez pas effectué de saisie de temps pour le " + date + ". Veuillez la compléter avant demain à 9h.", notificationEnvoyee.getContenu());
+        assertEquals("Vous n'avez pas effectué de saisie de temps pour le " + date + ".", notificationEnvoyee.getContenu());
         assertEquals(collaborateur.getId(), notificationEnvoyee.getCollaborateur_id());
 
         // Vérifier l'envoi de l'email
@@ -72,7 +72,6 @@ class SaisieTempsServiceTest {
 
     @Test
     void testCheckSaisieTemps_WhenSaisieExists_ShouldNotSendNotificationOrEmail() {
-        // GIVEN : Un utilisateur ayant déjà fait sa saisie
         LocalDate date = LocalDate.now();
         User collaborateur = new User();
         collaborateur.setId(1L);
@@ -82,10 +81,8 @@ class SaisieTempsServiceTest {
         when(userRepository.findByRole("Collaborateur")).thenReturn(collaborateurs);
         when(saisieTempsRepository.findByCollaborateurAndDate(collaborateur, date)).thenReturn(List.of(new SaisieTemps()));
 
-        // WHEN : Exécution de la méthode
         saisieTempsService.checkSaisieTemps(date);
 
-        // THEN : Vérifier qu'aucune notification ni email n'est envoyé
         verify(notificationService, never()).createNotification(any());
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }

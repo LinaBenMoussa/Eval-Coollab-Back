@@ -5,6 +5,7 @@ import com.example.backend.dto.SaisieTempsRequestDto;
 import com.example.backend.entity.Feedback;
 import com.example.backend.entity.SaisieTemps;
 import com.example.backend.service.SaisieTempsService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +15,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/saisietemps")
+@AllArgsConstructor
 public class SaisieTempsController {
-    @Autowired
-    private SaisieTempsService saisieTempsService;
+    private final SaisieTempsService saisieTempsService;
 
     @GetMapping("/issue/{id}")
     public List<SaisieTemps> getSaisieByIssue(@PathVariable Long id){

@@ -1,31 +1,23 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.CongeRequestDto;
 import com.example.backend.dto.response.CongeResponseDto;
 import com.example.backend.entity.Conge;
-import com.example.backend.entity.User;
 import com.example.backend.repository.CongeRepository;
-import com.example.backend.repository.UserRepository;
 import com.example.backend.specification.CongeSpecifications;
-import com.example.backend.specification.IssueSpecifications;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class CongeService {
-    @Autowired
-    private CongeRepository congeRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final CongeRepository congeRepository;
 
     public List<Conge> getCongesByManagerId(Long managerId) {
         return congeRepository.findByCollaborateur_ManagerId(managerId);

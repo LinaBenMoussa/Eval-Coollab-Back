@@ -7,6 +7,7 @@ import com.example.backend.entity.User;
 import com.example.backend.exception.ApplicationException;
 import com.example.backend.repository.FeedbackRepository;
 import com.example.backend.specification.FeedbackSpecifications;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,13 +20,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class FeedbackService {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private FeedbackRepository feedbackRepository;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    private final UserService userService;
+    private final FeedbackRepository feedbackRepository;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
     public Feedback createFeedback(FeedbackRequestDto feedbackDto) {
         if (feedbackDto.getCommentaire() == null || feedbackDto.getCommentaire().isEmpty() ||
