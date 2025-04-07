@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.NotificationRequestDto;
+import com.example.backend.dto.request.NotificationRequestDto;
 import com.example.backend.entity.Notification;
 import com.example.backend.entity.User;
 import com.example.backend.repository.NotificationRepository;

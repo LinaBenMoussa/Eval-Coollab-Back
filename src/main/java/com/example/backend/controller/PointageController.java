@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.PointageRequestDto;
-import com.example.backend.dto.PointageResponseDto;
+import com.example.backend.dto.request.PointageRequestDto;
+import com.example.backend.dto.response.PointageResponseDto;
 import com.example.backend.entity.Pointage;
 import com.example.backend.service.PointageService;
 import lombok.AllArgsConstructor;

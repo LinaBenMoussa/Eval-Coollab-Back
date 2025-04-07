@@ -1,6 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.CreateUserRequestDto;
+import com.example.backend.dto.request.CreateUserRequestDto;
 import com.example.backend.entity.User;
 import com.example.backend.service.CollaborateurStatsService;
 import com.example.backend.service.UserService;

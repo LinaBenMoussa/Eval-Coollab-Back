@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.FeedbackRequestDto;
+import com.example.backend.dto.request.FeedbackRequestDto;
 import com.example.backend.dto.response.FeedbackResponseDto;
 import com.example.backend.entity.Feedback;
 import com.example.backend.entity.User;

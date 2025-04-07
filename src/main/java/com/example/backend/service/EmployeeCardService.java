@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.EmployeeCardDTO;
+import com.example.backend.dto.response.EmployeeCardDTO;
 import com.example.backend.entity.Conge;
 import com.example.backend.entity.Pointage;
 import com.example.backend.entity.User;

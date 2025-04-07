@@ -93,4 +93,19 @@ public class CollaborateurStatsService {
 
         return stats;
     }
+
+    public void generateMonthlyProductivityForAllCollaborateurs(Date startDate) {
+        SimpleJdbcCall monthlyProductivityCall = new SimpleJdbcCall(jdbcTemplate)
+                .withoutProcedureColumnMetaDataAccess()
+                .withProcedureName("GenerateMonthlyProductivityForAllCollaborateurs")
+                .declareParameters(
+                        new SqlParameter("start_date", Types.DATE)
+                );
+
+        Map<String, Object> params = Map.of(
+                "start_date", startDate
+        );
+
+        monthlyProductivityCall.execute(params);
+    }
 }

@@ -1,6 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.ResponseSaisieTempsDto;
+import com.example.backend.dto.response.ResponseSaisieTempsDto;
 import com.example.backend.entity.SaisieTemps;
 import com.example.backend.service.SaisieTempsService;
 import lombok.AllArgsConstructor;

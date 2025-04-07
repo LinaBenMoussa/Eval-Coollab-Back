@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.LoginResponseDto;
+import com.example.backend.dto.response.LoginResponseDto;
 import com.example.backend.exception.ApplicationException;
 import com.example.backend.security.JwtIssuer;
 import com.example.backend.security.UserPrinciple;

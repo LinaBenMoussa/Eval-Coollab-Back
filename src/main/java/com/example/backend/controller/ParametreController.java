@@ -1,6 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.ParametreDto;
+import com.example.backend.dto.response.ParametreDto;
 import com.example.backend.service.ParametreService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

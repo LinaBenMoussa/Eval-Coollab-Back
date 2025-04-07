@@ -1,6 +1,5 @@
-package com.example.backend.dto;
+package com.example.backend.dto.request;
 
-import com.example.backend.entity.User;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;

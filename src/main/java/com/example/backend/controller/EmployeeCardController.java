@@ -1,6 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.EmployeeCardDTO;
+import com.example.backend.dto.response.EmployeeCardDTO;
 import com.example.backend.service.EmployeeCardService;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;

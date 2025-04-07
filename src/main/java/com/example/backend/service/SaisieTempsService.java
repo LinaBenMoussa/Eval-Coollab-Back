@@ -1,7 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.NotificationRequestDto;
-import com.example.backend.dto.ResponseSaisieTempsDto;
+import com.example.backend.dto.request.NotificationRequestDto;
+import com.example.backend.dto.response.ResponseSaisieTempsDto;
 import com.example.backend.entity.SaisieTemps;
 import com.example.backend.entity.User;
 import com.example.backend.repository.SaisieTempsRepository;

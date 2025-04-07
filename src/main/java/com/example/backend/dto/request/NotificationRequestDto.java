@@ -1,8 +1,5 @@
-package com.example.backend.dto;
+package com.example.backend.dto.request;
 
-import com.example.backend.entity.User;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
