@@ -1,7 +1,9 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.response.LoginResponseDto;
+import com.example.backend.entity.User;
 import com.example.backend.exception.ApplicationException;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.security.JwtIssuer;
 import com.example.backend.security.UserPrinciple;
 import lombok.*;
@@ -11,6 +13,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 @Data
@@ -18,6 +22,8 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
+
+    private final UserRepository userRepository;
 
     private final JwtIssuer jwtIssuer;
 
@@ -37,10 +43,13 @@ public class AuthService {
 
             var token = jwtIssuer.issue(principle.getId(), principle.getUsername(), roles);
 
+            Optional<User> user = userRepository.findById(principle.getId());
+
             return LoginResponseDto.builder()
                     .id(principle.getId())
                     .accessToken(token)
-                    .user(principle.getUsername())
+                    .firstName(user.get().getPrenom())
+                    .lastName(user.get().getNom())
                     .role(roles)
                     .build();
         } catch (AuthenticationException e) {

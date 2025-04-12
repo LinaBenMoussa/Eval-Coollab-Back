@@ -85,7 +85,7 @@ public class PointageService {
                 );
 
                 // Envoyer une notification Bitrix24
-//                bitrixNotificationService.sendNotification(collaborateur.getId_bitrix24(), message);
+               bitrixNotificationService.sendNotification(collaborateur.getId_bitrix24(), message);
 
                 String email = collaborateur.getEmail();
                 String subject = "Alerte : Heures de travail non accomplies";

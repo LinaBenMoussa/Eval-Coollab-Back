@@ -13,7 +13,7 @@ public class SaisieTempsScheduler {
 
     private final SaisieTempsService saisieTempsService;
 
-    @Scheduled(cron = "0 09 17 * * ?")
+    @Scheduled(cron = "0 30 09 * * ?")
     public void checkSaisieTemps() {
         LocalDate today = LocalDate.now();
         saisieTempsService.checkSaisieTemps(today);

@@ -40,7 +40,7 @@ public class CollaborateurStatsService {
                         new SqlOutParameter("average_task_completion_time", Types.FLOAT),
                         new SqlOutParameter("conge_utilization_rate", Types.FLOAT),
                         new SqlOutParameter("overtime_hours", Types.FLOAT),
-                        new SqlOutParameter("task_complexity_score", Types.FLOAT),
+                        new SqlOutParameter("task_total_echeance_not_null", Types.FLOAT),
                         new SqlOutParameter("task_completion_rate", Types.FLOAT),
                         new SqlOutParameter("daily_avg_working_hours", Types.FLOAT),
                         new SqlOutParameter("temps_moyen_retard", Types.FLOAT)
@@ -63,7 +63,7 @@ public class CollaborateurStatsService {
         stats.put("averageTaskCompletionTime", statsResult.get("average_task_completion_time"));
         stats.put("congeUtilizationRate", statsResult.get("conge_utilization_rate"));
         stats.put("overtimeHours", statsResult.get("overtime_hours"));
-        stats.put("taskComplexityScore", statsResult.get("task_complexity_score"));
+        stats.put("task_total_echeance_not_null", statsResult.get("task_total_echeance_not_null"));
         stats.put("taskCompletionRate", statsResult.get("task_completion_rate"));
         stats.put("dailyAvgWorkingHours", statsResult.get("daily_avg_working_hours"));
         stats.put("tempsMoyenRetard", statsResult.get("temps_moyen_retard"));

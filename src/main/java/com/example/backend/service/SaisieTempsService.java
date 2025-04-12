@@ -30,6 +30,8 @@ public class SaisieTempsService {
 
     private final EmailService emailService;
 
+    private final BitrixNotificationService bitrixNotificationService;
+
     public List<SaisieTemps> getSaisieByIssueId(Long issueId) {
         return saisieTempsRepository.findByIssueId(issueId);
     }
@@ -48,7 +50,7 @@ public class SaisieTempsService {
                 String message = String.format("Vous n'avez pas effectué de saisie de temps pour le %s.", date);
 
                 if (collaborateur.getId_bitrix24() != null) {
-                    // bitrixNotificationService.sendNotification(collaborateur.getId_bitrix24(), message);
+                    bitrixNotificationService.sendNotification(collaborateur.getId_bitrix24(), message);
                 }
 
                 String email = collaborateur.getEmail();
