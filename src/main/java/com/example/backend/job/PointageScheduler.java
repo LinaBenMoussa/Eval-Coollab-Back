@@ -12,9 +12,14 @@ public class PointageScheduler {
 
     private final PointageService pointageService;
 
-    @Scheduled(cron = "0 00 20 * * ?")
+    @Scheduled(cron = "0 30 08 * * ?")
     public void checkWorkHoursDaily() {
-        LocalDate today = LocalDate.now();
-        pointageService.checkWorkHoursForAllCollaborateurs(today);
+        LocalDate day = LocalDate.now().minusDays(1);;
+        pointageService.checkWorkHoursForAllCollaborateurs(day);
+    }
+    @Scheduled(fixedRate = 60000)
+    public void checkIsLate() {
+        LocalDate day = LocalDate.now();
+        pointageService.checkIsLate(day);
     }
 }

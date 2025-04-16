@@ -15,5 +15,6 @@ public class CreateUserRequestDto {
     private Long managerId;
     private Long id_redmine;
     private Long id_bitrix24;
+    private String matricule;
 
 }

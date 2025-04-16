@@ -1,10 +1,14 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.response.NotificationsResponseDto;
 import com.example.backend.entity.Notification;
 import com.example.backend.service.NotificationService;
 import lombok.AllArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -31,5 +35,16 @@ public class NotificationController {
         return "Notifications marquées comme lues avec succès !";
     }
 
+    @GetMapping("/filtre")
+    public ResponseEntity<NotificationsResponseDto> getNotificationByManagerId(
+            @RequestParam(required = false) Long managerId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) Long collaborateurId,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit) {
+        NotificationsResponseDto response= notificationService.getFiltredNotifications(managerId,collaborateurId,startDate,endDate,offset,limit);
+        return ResponseEntity.ok(response);
+    }
 
 }

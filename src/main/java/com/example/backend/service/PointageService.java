@@ -5,12 +5,16 @@ import com.example.backend.dto.request.PointageRequestDto;
 import com.example.backend.dto.response.PointageResponseDto;
 import com.example.backend.entity.Conge;
 import com.example.backend.entity.Pointage;
+import com.example.backend.entity.RetardLog;
 import com.example.backend.entity.User;
+import com.example.backend.event.RetardEvent;
 import com.example.backend.repository.CongeRepository;
 import com.example.backend.repository.PointageRepository;
+import com.example.backend.repository.RetardLogRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.specification.PointageSpecifications;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -39,6 +43,11 @@ public class PointageService {
 
     private final CongeRepository congeRepository;
 
+    private final ApplicationEventPublisher eventPublisher;
+
+    private final RetardLogRepository retardLogRepository;
+
+
     private static final int REQUIRED_HOURS = 9;
 
     public void checkWorkHoursForAllCollaborateurs(LocalDate date) {
@@ -62,7 +71,6 @@ public class PointageService {
                     autorisationHours = Duration.between(conge.getHeureDeb(), conge.getHeureFin()).toHours();
                 }
             }
-            System.out.println("conge : "+conge);
 
             long requiredHoursAdjusted = Math.max(0, REQUIRED_HOURS - (congeHours + autorisationHours));
 
@@ -92,7 +100,7 @@ public class PointageService {
                 if(email != null) {
                     emailService.sendEmail("lina.b.moussa@gmail.com", subject, message);
                 }
-                LocalDateTime dateEnvoi = LocalDateTime.of(date, LocalTime.now());
+                LocalDateTime dateEnvoi = LocalDateTime.of(LocalDate.now(), LocalTime.now());
                 notificationService.createNotification(new NotificationRequestDto(subject, message, collaborateur.getId(), dateEnvoi));
 
             }
@@ -199,5 +207,80 @@ public class PointageService {
     public List<Pointage> getPointagesByManagerAndDate(Long managerId, LocalDate date) {
         return pointageRepository.findByCollaborateur_ManagerIdAndDate(managerId, date);
     }
+
+    public void checkIsLate(LocalDate date) {
+        List<User> collaborateurs = userRepository.findByRole("Collaborateur");
+
+        for (User collaborateur : collaborateurs) {
+            String matricule = collaborateur.getMatricule();
+
+            // 🔒 Éviter les doublons : on vérifie si le collaborateur est déjà dans RetardLog pour ce jour-là
+            boolean dejaSignale = retardLogRepository
+                    .findByCollaborateur_MatriculeAndDateRetard(matricule, date)
+                    .isPresent();
+
+            if (dejaSignale) continue;
+
+            List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(matricule, date);
+            Conge conge = congeRepository.findByCollaborateurAndDateRange(matricule, date);
+            LocalTime now = LocalTime.now();
+            LocalTime limiteRetard = LocalTime.of(8, 10);
+
+            // 1. Congé total : on skip
+            if (conge != null && "CA".equals(conge.getType())) {
+                continue;
+            }
+
+            boolean isEnRetard = false;
+
+            // 2. Pas de pointage
+            if (pointages.isEmpty()) {
+                if (conge == null && now.isAfter(limiteRetard)) {
+                    isEnRetard = true;
+                } else if (conge != null && "A".equals(conge.getType())) {
+                    LocalTime heureFinAutorisation = conge.getHeureFin();
+                    if (heureFinAutorisation != null && !heureFinAutorisation.isBefore(limiteRetard)) {
+                        limiteRetard = heureFinAutorisation.plusMinutes(10);
+                    }
+                    if (now.isAfter(limiteRetard)) {
+                        isEnRetard = true;
+                    }
+                }
+            } else {
+                // 3. Avec pointage(s)
+                for (Pointage pointage : pointages) {
+                    LocalTime heureArrivee = pointage.getHeure_arrivee();
+
+                    if (conge != null && "A".equals(conge.getType())) {
+                        LocalTime heureFinAutorisation = conge.getHeureFin();
+                        if (heureFinAutorisation != null && !heureFinAutorisation.isBefore(limiteRetard)) {
+                            limiteRetard = heureFinAutorisation.plusMinutes(10);
+                        }
+                    }
+
+                    if (heureArrivee != null && heureArrivee.isAfter(limiteRetard)) {
+                        isEnRetard = true;
+                        break;
+                    }
+                }
+            }
+
+            // 🔄 Si retard détecté et pas encore enregistré → on publie l'event et on enregistre le log
+            if (isEnRetard) {
+                RetardEvent event = new RetardEvent(collaborateur);
+                eventPublisher.publishEvent(event);
+
+                RetardLog log = RetardLog.builder()
+                        .collaborateur(collaborateur)
+                        .dateRetard(date)
+                        .build();
+                retardLogRepository.save(log);
+            }
+        }
+    }
+
+
+
+
 
 }

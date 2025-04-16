@@ -26,7 +26,7 @@ public class UserController {
 
     @PostMapping("/create")
     public User createUser(@RequestBody CreateUserRequestDto user) {
-        return userService.createUser(user.getNom(), user.getPrenom(),user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId(), user.getId_redmine(), user.getId_redmine());
+        return userService.createUser(user.getNom(), user.getPrenom(),user.getMatricule(),user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId(), user.getId_redmine(), user.getId_redmine());
     }
     @PutMapping
     public User updateUser(@RequestBody CreateUserRequestDto user) {

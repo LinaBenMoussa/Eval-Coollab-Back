@@ -15,8 +15,8 @@ public class SaisieTempsScheduler {
 
     @Scheduled(cron = "0 30 09 * * ?")
     public void checkSaisieTemps() {
-        LocalDate today = LocalDate.now();
-        saisieTempsService.checkSaisieTemps(today);
+        LocalDate day = LocalDate.now().minusDays(1);
+        saisieTempsService.checkSaisieTemps(day);
     }
 
 }
