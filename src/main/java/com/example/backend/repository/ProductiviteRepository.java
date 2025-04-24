@@ -9,6 +9,7 @@ import java.util.List;
 
 @Repository
 public interface ProductiviteRepository extends JpaRepository<Productivite, Long> {
-    @Query(value = "SELECT * FROM t_productivite ORDER BY rang ASC LIMIT 5", nativeQuery = true)
-    List<Productivite> findTop5ByOrderByRangAsc();
+
+    @Query("SELECT p FROM Productivite p WHERE p.collaborateur.manager.id= :id ORDER BY p.rang ASC")
+    List<Productivite> findTop5ByManagerIdOrderByRangAsc(Long id);
 }

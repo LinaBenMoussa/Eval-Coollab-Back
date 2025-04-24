@@ -16,10 +16,9 @@ public class BadgeScheduler {
 
     private final BadgeService badgeService;
 
-    @Scheduled(cron = "0 13 10 * * ?")
+    @Scheduled(cron = "0 0 0 1 * ?")
     public void executeMonthlyProductivityJob() {
         LocalDate startDate = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-
         badgeService.attribuerBadges(startDate);
 
     }

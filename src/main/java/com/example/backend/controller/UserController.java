@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.request.CreatePasswordRequest;
 import com.example.backend.dto.request.CreateUserRequestDto;
 import com.example.backend.entity.User;
 import com.example.backend.service.CollaborateurStatsService;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,5 +67,27 @@ public class UserController {
 
         return collaborateurService.getCollaborateurStats(collaborateurId, sqlStartDate, sqlEndDate,type);
     }
+
+    @PostMapping("/create-password")
+    public ResponseEntity<User> createPassword(@RequestBody CreatePasswordRequest request) {
+        User updatedUser = userService.createPassword(request.getUsername(), request.getPassword());
+        return ResponseEntity.ok(updatedUser);
+    }
+    @GetMapping("/{username}/is-new")
+    public ResponseEntity<Map<String, Boolean>> isNewUser(@PathVariable String username) {
+        Map<String, Boolean> response = new HashMap<>();
+        boolean existe = userService.existeUser(username);
+        response.put("existe", existe);
+
+        if (existe) {
+            boolean isNew = userService.isNewUser(username);
+            response.put("isNew", isNew);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
 
 }

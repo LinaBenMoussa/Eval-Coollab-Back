@@ -134,4 +134,32 @@ public class UserService {
 
         userRepository.delete(user);
     }
+
+    public User createPassword(String username, String newPassword) {
+        if (newPassword == null || newPassword.isEmpty()) {
+            throw new ApplicationException("Le mot de passe ne peut pas être vide.");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApplicationException("Utilisateur non trouvé."));
+
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            throw new ApplicationException("Le mot de passe a déjà été défini.");
+        }
+
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(hashedPassword);
+
+        return userRepository.save(user);
+    }
+    public boolean isNewUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApplicationException("Utilisateur non trouvé."));
+
+        return user.getPassword() == null || user.getPassword().isEmpty();
+    }
+    public boolean existeUser(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
+
 }

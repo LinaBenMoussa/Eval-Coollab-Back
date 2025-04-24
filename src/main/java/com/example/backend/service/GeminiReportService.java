@@ -38,41 +38,60 @@ public class GeminiReportService {
 
     private String buildPrompt(EmployeeDataDto data) {
         return String.format("""
-        Génère un **rapport professionnel** d'évaluation d'un employé au **format HTML complet**.
+    Génère un **rapport professionnel** d'évaluation d'un employé au **format HTML complet**.
 
-        ✅ Contraintes :
-        - Le code HTML doit être **entièrement structuré**, **stylisé** avec des couleurs sobres (bleu, gris, blanc) pour un rendu professionnel.
-        - Utilise une **mise en page élégante** avec des sections bien séparées (par exemple : encadrés, tableaux ou cartes).
-        - **Ne commence pas la réponse par** ```html ou '''html.
-        - **Retourne uniquement le code HTML brut**, sans balise Markdown, sans commentaire, sans texte autour, sans balise <html> au debut.
+    ✅ Contraintes :
+    - Le code HTML doit être **entièrement structuré**, **stylisé** avec des couleurs sobres (bleu, gris, blanc) pour un rendu professionnel.
+    - Utilise une **mise en page élégante** avec des sections bien séparées (par exemple : encadrés, tableaux ou cartes).
+    - **Ne commence pas la réponse par** ```html ou '''html.
+    - **Retourne uniquement le code HTML brut**, sans balise Markdown, sans commentaire, sans texte autour, sans balise <html> au début.
 
-        ✅ Contenu à inclure dans le rapport :
+    ✅ Très important :
+    - Chaque **point fort**, **point à améliorer** et **recommandation** doit être **strictement basé sur les statistiques fournies**.
+    - **Ne fais aucune supposition**. Ne génère rien qui ne peut être déduit directement des données suivantes.
 
-        - **Employé** : %s
-        - **Période** : %s
+    ✅ Contenu à inclure dans le rapport :
 
-        ### Points forts :
-        - Productivité : %.2f / 100
-        - Respect des échéances : %.2f%%
+    - **Employé** : %s
+    - **Période** : %s
 
-        ### Points à améliorer :
-        - Taux de retard : %.2f%%
+    ### Statistiques disponibles :
+    - Productivité : %s
+    - Respect des échéances : %s
+    - Taux de retard : %s
+    - Temps moyen de réalisation des tâches : %s
+    - Taux d’utilisation de congés : %s
+    - Moyenne d'heures de travail par jour : %s
+    - Taux de feedbacks négatifs : %s
+    - Taux de feedbacks positifs : %s
 
-        ### Recommandations :
-        - Rédige 3 recommandations concrètes et personnalisées pour améliorer les performances.
+    ### Points forts :
+    - Liste des points forts de cet employé **basés uniquement sur les chiffres**.
 
-        ✅ Ton : professionnel, objectif, constructif.
+    ### Points à améliorer :
+    - Liste des points à améliorer **appuyés par les statistiques**.
 
-        ✅ Objectif : ce rapport sera affiché directement dans une page web ou exporté en PDF.
-        """,
+    ### Recommandations :
+    - Rédige 3 recommandations **concrètes et personnalisées**, toujours **en lien direct avec les statistiques** ci-dessus.
+
+    ✅ Ton : professionnel, objectif, constructif.
+
+    ✅ Objectif : ce rapport sera affiché directement dans une page web ou exporté en PDF.
+    """,
                 data.getEmployeeName(),
                 data.getPeriod(),
                 data.getProductivityScore(),
                 data.getRespectEcheanceRate(),
-                data.getRetardRate()
+                data.getRetardRate(),
+                data.getAverageTaskCompletionTime(),
+                data.getCongeUtilizationRate(),
+                data.getDailyAvgWorkingHours(),
+                data.getNegativeRate(),
+                data.getPositiveRate(),
+                data.getOvertimeHours(),
+                data.getTotalHoursMissing()
         );
     }
-
 
 
     private String buildGeminiRequest(String prompt) throws Exception {

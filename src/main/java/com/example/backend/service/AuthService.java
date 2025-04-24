@@ -50,6 +50,7 @@ public class AuthService {
                     .accessToken(token)
                     .firstName(user.get().getPrenom())
                     .lastName(user.get().getNom())
+                    .matricule(user.get().getMatricule())
                     .role(roles)
                     .build();
         } catch (AuthenticationException e) {

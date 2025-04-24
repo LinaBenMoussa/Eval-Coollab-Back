@@ -50,7 +50,7 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Size(min = 6)
     private String password;
 

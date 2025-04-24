@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/pointages")
@@ -54,5 +55,13 @@ public class PointageController {
             @RequestParam(defaultValue = "100") int limit
     ) {
         return pointageService.getPointagesByManagerId(managerId, startDate, endDate, collaborateurId, offset, limit);
+    }
+    @GetMapping("/work-hours")
+    public List<Map<String, Object>> getWorkHours(
+            @RequestParam String matricule,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        return pointageService.calculateWorkHoursByPeriod(matricule, startDate, endDate);
     }
 }

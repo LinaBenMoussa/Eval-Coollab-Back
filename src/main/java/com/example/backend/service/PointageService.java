@@ -25,7 +25,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @Service
@@ -279,7 +282,92 @@ public class PointageService {
         }
     }
 
+    public List<Map<String, Object>> calculateWorkHoursByPeriod(String matricule, LocalDate startDate, LocalDate endDate) {
+        List<Map<String, Object>> workHoursList = new ArrayList<>();
 
+        LocalDate currentDate = startDate;
+        while (!currentDate.isAfter(endDate)) {
+            List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(
+                    matricule, currentDate
+            );
+
+            Conge conge = congeRepository.findByCollaborateurAndDateRange(matricule, currentDate);
+
+            long totalMinutes = 0;
+            long totalHours = 0;
+            boolean hasPointage = false;
+            String status = "Absent";
+
+            for (Pointage pointage : pointages) {
+                LocalTime heureArrivee = pointage.getHeure_arrivee();
+                LocalTime heureDepart = pointage.getHeure_depart();
+
+                if (heureArrivee != null && heureDepart != null) {
+                    Duration duration = Duration.between(heureArrivee, heureDepart);
+                    totalMinutes += duration.toMinutes();
+
+                    LocalTime pauseDebut = LocalTime.of(12, 0);
+                    LocalTime pauseFin = LocalTime.of(12, 30);
+
+                    if (heureArrivee.isBefore(pauseDebut) && heureDepart.isAfter(pauseFin)) {
+                        totalMinutes -= 60;
+                    }
+                    else if (heureArrivee.isBefore(pauseDebut) && !heureDepart.isBefore(pauseDebut) && heureDepart.isBefore(pauseFin)) {
+                        totalMinutes -= Duration.between(pauseDebut, heureDepart).toMinutes();
+                    }
+                    else if (!heureArrivee.isAfter(pauseFin) && heureArrivee.isAfter(pauseDebut) && heureDepart.isAfter(pauseFin)) {
+                        totalMinutes -= Duration.between(heureArrivee, pauseFin).toMinutes();
+                    }
+                    else if (!heureArrivee.isBefore(pauseDebut) && !heureDepart.isAfter(pauseFin)) {
+                        totalMinutes -= duration.toMinutes();
+                    }
+
+                    hasPointage = true;
+                    status = "Présent";
+                } else if (heureArrivee != null) {
+                    status = "En poste";
+                    hasPointage = true;
+                }
+            }
+
+            totalHours = totalMinutes / 60;
+            long remainingMinutes = totalMinutes % 60;
+
+            if (conge != null) {
+                if ("CA".equals(conge.getType())) {
+                    status = "Congé";
+                    totalHours = 9;
+                    remainingMinutes = 0;
+                } else if ("A".equals(conge.getType())) {
+                    status = "Autorisation";
+                    if (hasPointage) {
+                        status = "Présent + Autorisation";
+                    }
+
+                    if (conge.getHeureDeb() != null && conge.getHeureFin() != null) {
+                        Duration autorisationDuration = Duration.between(conge.getHeureDeb(), conge.getHeureFin());
+                        long autorisationMinutes = autorisationDuration.toMinutes();
+
+                        totalMinutes += autorisationMinutes;
+                        totalHours = totalMinutes / 60;
+                        remainingMinutes = totalMinutes % 60;
+                    }
+                }
+            }
+
+            Map<String, Object> dayInfo = new HashMap<>();
+            dayInfo.put("date", currentDate);
+            dayInfo.put("hours", totalHours);
+            dayInfo.put("minutes", remainingMinutes);
+            dayInfo.put("status", status);
+
+            workHoursList.add(dayInfo);
+
+            currentDate = currentDate.plusDays(1);
+        }
+
+        return workHoursList;
+    }
 
 
 

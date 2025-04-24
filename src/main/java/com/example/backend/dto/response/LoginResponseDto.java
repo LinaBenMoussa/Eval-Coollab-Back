@@ -16,6 +16,7 @@ public class LoginResponseDto {
     private List<String> role;
     private String firstName;
     private String lastName;
+    private String matricule;
 
     private Long id;
 }

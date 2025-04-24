@@ -38,6 +38,8 @@ public class WebSecurityConfig {
                         .requestMatchers("/parametres/jwt-secret").permitAll()
                         .requestMatchers("/parametres/jwt-expiration").permitAll()
                         .requestMatchers("/users/create").permitAll()
+                        .requestMatchers("/users/{username}/is-new").permitAll()
+                        .requestMatchers("/users/create-password").permitAll()
                         .requestMatchers("/").permitAll()
                         .anyRequest().authenticated()
                 )

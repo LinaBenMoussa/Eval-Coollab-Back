@@ -43,6 +43,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
             filterChain.doFilter(request, response);
             return;
         }
+        if ("/users/{username}/is-new".equals(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if ("/users/create-password".equals(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
 
         extractTokenFromRequest(request)

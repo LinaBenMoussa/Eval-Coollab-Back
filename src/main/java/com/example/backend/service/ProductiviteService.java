@@ -18,7 +18,8 @@ public class ProductiviteService {
         this.productiviteRepository = employeProductivitéRepository;
     }
 
-    public List<Productivite> getTop5Collaborateurs() {
-        return productiviteRepository.findTop5ByOrderByRangAsc();
+    public List<Productivite> getTop5Collaborateurs(Long managerId) {
+        System.out.println("productivite : "+managerId);
+        return productiviteRepository.findTop5ByManagerIdOrderByRangAsc(managerId);
     }
 }
