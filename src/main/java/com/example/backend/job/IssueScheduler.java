@@ -17,7 +17,7 @@ public class IssueScheduler {
     private final ApplicationEventPublisher eventPublisher;
 
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 0 11,16 * * *")
     public void checkExpiredIssues() {
         LocalDateTime now = LocalDateTime.now();
         List<Issue> expiredIssues = issueRepository.findNonExpiredIssues(now);

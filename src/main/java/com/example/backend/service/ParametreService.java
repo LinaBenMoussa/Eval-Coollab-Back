@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -61,5 +62,31 @@ public class ParametreService {
             parametreRepository.save(newParam);
         }
     }
+    public String getParametre(String cle) {
+        return parametreRepository.findByCle(cle)
+                .map(Parametre::getValeur)
+                .orElse(null);
+    }
+
+    public void setParametre(String cle, String valeur) {
+        // Cherche le paramètre existant
+        Parametre parametre = parametreRepository.findByCle(cle)
+                .orElseThrow(() -> new IllegalArgumentException("Le paramètre avec la clé " + cle + " n'existe pas"));
+
+        // Met à jour la valeur du paramètre
+        parametre.setValeur(valeur);
+
+        // Sauvegarde le paramètre mis à jour
+        parametreRepository.save(parametre);
+    }
+
+    public List<Parametre> getAll() {
+        return parametreRepository.findAll().stream()
+                .filter(parametre -> !"jwt_secret_key".equals(parametre.getCle()))
+                .collect(Collectors.toList());
+    }
+
+
+
 }
 

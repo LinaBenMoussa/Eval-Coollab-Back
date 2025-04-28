@@ -3,15 +3,9 @@ package com.example.backend.service;
 import com.example.backend.dto.request.NotificationRequestDto;
 import com.example.backend.dto.request.PointageRequestDto;
 import com.example.backend.dto.response.PointageResponseDto;
-import com.example.backend.entity.Conge;
-import com.example.backend.entity.Pointage;
-import com.example.backend.entity.RetardLog;
-import com.example.backend.entity.User;
+import com.example.backend.entity.*;
 import com.example.backend.event.RetardEvent;
-import com.example.backend.repository.CongeRepository;
-import com.example.backend.repository.PointageRepository;
-import com.example.backend.repository.RetardLogRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repository.*;
 import com.example.backend.specification.PointageSpecifications;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,47 +29,68 @@ import java.util.Map;
 public class PointageService {
 
     private final PointageRepository pointageRepository;
-
+    private final ParametreRepository parametreRepository;
     private final UserRepository userRepository;
-
     private final NotificationService notificationService;
-
     private final BitrixNotificationService bitrixNotificationService;
-
     private final EmailService emailService;
-
     private final CongeRepository congeRepository;
-
     private final ApplicationEventPublisher eventPublisher;
-
     private final RetardLogRepository retardLogRepository;
+    private final JoursFeriesService joursFeriesService;
 
+    public double getRequiredHours() {
+        // 1. Charger les paramètres
+        String heureFinStr = parametreRepository.findByCle("heure_travail_fin")
+                .map(Parametre::getValeur)
+                .orElse("17:30");
 
-    private static final int REQUIRED_HOURS = 9;
+        String heureDebutStr = parametreRepository.findByCle("heure_travail_debut")
+                .map(Parametre::getValeur)
+                .orElse("08:00");
+
+        LocalTime heureFin = LocalTime.parse(heureFinStr);
+        LocalTime heureDebut = LocalTime.parse(heureDebutStr);
+
+        long minutes = Duration.between(heureDebut, heureFin).toMinutes();
+        double heures = minutes / 60.0;
+
+        // 4. Retirer 1 heure pour la pause déjeuner
+        return heures - Double.parseDouble(
+                parametreRepository.findByCle("duree_pause_dejeuner")
+                        .map(Parametre::getValeur)
+                        .orElse("1")
+        );
+    }
 
     public void checkWorkHoursForAllCollaborateurs(LocalDate date) {
+        // Si c'est un jour férié, ne pas vérifier les heures de travail
+        if (joursFeriesService.estJourFerie(date)) {
+            return;
+        }
+
         List<User> collaborateurs = userRepository.findByRole("Collaborateur");
 
         for (User collaborateur : collaborateurs) {
             List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(
                     collaborateur.getMatricule(), date
             );
-            LocalDate selectedDate=date;
-            String matricule=collaborateur.getMatricule();
+            LocalDate selectedDate = date;
+            String matricule = collaborateur.getMatricule();
+            double REQUIRED_HOURS = getRequiredHours();
 
             Conge conge = congeRepository.findByCollaborateurAndDateRange(matricule, selectedDate);
-            long congeHours = 0;
-            long autorisationHours = 0;
+            double congeHours = 0;
+            double autorisationHours = 0;
 
             if (conge != null) {
                 if ("CA".equals(conge.getType())) {
-                    congeHours = 9;
+                    congeHours = getRequiredHours();
                 } else if ("A".equals(conge.getType())) {
                     autorisationHours = Duration.between(conge.getHeureDeb(), conge.getHeureFin()).toHours();
                 }
             }
-
-            long requiredHoursAdjusted = Math.max(0, REQUIRED_HOURS - (congeHours + autorisationHours));
+            double requiredHoursAdjusted = Math.max(0, REQUIRED_HOURS - (congeHours + autorisationHours));
 
             long totalHoursWorked = 0;
             for (Pointage pointage : pointages) {
@@ -86,7 +101,6 @@ public class PointageService {
                     Duration duration = Duration.between(heureArrivee, heureDepart);
                     totalHoursWorked += duration.toHours();
                 }
-
             }
 
             if (totalHoursWorked < requiredHoursAdjusted) {
@@ -96,7 +110,7 @@ public class PointageService {
                 );
 
                 // Envoyer une notification Bitrix24
-               bitrixNotificationService.sendNotification(collaborateur.getId_bitrix24(), message);
+                bitrixNotificationService.sendNotification(collaborateur.getId_bitrix24(), message);
 
                 String email = collaborateur.getEmail();
                 String subject = "Alerte : Heures de travail non accomplies";
@@ -105,9 +119,9 @@ public class PointageService {
                 }
                 LocalDateTime dateEnvoi = LocalDateTime.of(LocalDate.now(), LocalTime.now());
                 notificationService.createNotification(new NotificationRequestDto(subject, message, collaborateur.getId(), dateEnvoi));
-
             }
-    }}
+        }
+    }
 
     public List<Pointage> getPointagesByManagerId(Long managerId) {
         return pointageRepository.findByCollaborateur_ManagerId(managerId);
@@ -212,12 +226,16 @@ public class PointageService {
     }
 
     public void checkIsLate(LocalDate date) {
+        // Si c'est un jour férié, ne pas vérifier les retards
+        if (joursFeriesService.estJourFerie(date)) {
+            return;
+        }
+
         List<User> collaborateurs = userRepository.findByRole("Collaborateur");
 
         for (User collaborateur : collaborateurs) {
             String matricule = collaborateur.getMatricule();
 
-            // 🔒 Éviter les doublons : on vérifie si le collaborateur est déjà dans RetardLog pour ce jour-là
             boolean dejaSignale = retardLogRepository
                     .findByCollaborateur_MatriculeAndDateRetard(matricule, date)
                     .isPresent();
@@ -227,16 +245,19 @@ public class PointageService {
             List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(matricule, date);
             Conge conge = congeRepository.findByCollaborateurAndDateRange(matricule, date);
             LocalTime now = LocalTime.now();
-            LocalTime limiteRetard = LocalTime.of(8, 10);
+            String heureDebutStr = parametreRepository.findByCle("heure_travail_debut")
+                    .map(Parametre::getValeur)
+                    .orElse("08:00");
 
-            // 1. Congé total : on skip
+            LocalTime heureDebut = LocalTime.parse(heureDebutStr);
+            LocalTime limiteRetard = heureDebut.plusMinutes(10);
+
             if (conge != null && "CA".equals(conge.getType())) {
                 continue;
             }
 
             boolean isEnRetard = false;
 
-            // 2. Pas de pointage
             if (pointages.isEmpty()) {
                 if (conge == null && now.isAfter(limiteRetard)) {
                     isEnRetard = true;
@@ -250,7 +271,6 @@ public class PointageService {
                     }
                 }
             } else {
-                // 3. Avec pointage(s)
                 for (Pointage pointage : pointages) {
                     LocalTime heureArrivee = pointage.getHeure_arrivee();
 
@@ -268,7 +288,6 @@ public class PointageService {
                 }
             }
 
-            // 🔄 Si retard détecté et pas encore enregistré → on publie l'event et on enregistre le log
             if (isEnRetard) {
                 RetardEvent event = new RetardEvent(collaborateur);
                 eventPublisher.publishEvent(event);
@@ -294,9 +313,25 @@ public class PointageService {
             Conge conge = congeRepository.findByCollaborateurAndDateRange(matricule, currentDate);
 
             long totalMinutes = 0;
-            long totalHours = 0;
+            double totalHours = 0;
             boolean hasPointage = false;
             String status = "Absent";
+
+            // Vérifier si c'est un jour férié
+            if (joursFeriesService.estJourFerie(currentDate)) {
+                status = "Jour Férié";
+                totalHours = getRequiredHours();
+
+                Map<String, Object> dayInfo = new HashMap<>();
+                dayInfo.put("date", currentDate);
+                dayInfo.put("hours", totalHours);
+                dayInfo.put("minutes", 0);
+                dayInfo.put("status", status);
+                workHoursList.add(dayInfo);
+
+                currentDate = currentDate.plusDays(1);
+                continue;
+            }
 
             for (Pointage pointage : pointages) {
                 LocalTime heureArrivee = pointage.getHeure_arrivee();
@@ -306,8 +341,16 @@ public class PointageService {
                     Duration duration = Duration.between(heureArrivee, heureDepart);
                     totalMinutes += duration.toMinutes();
 
-                    LocalTime pauseDebut = LocalTime.of(12, 0);
-                    LocalTime pauseFin = LocalTime.of(12, 30);
+                    String pauseDebutStr = parametreRepository.findByCle("pause_debut")
+                            .map(Parametre::getValeur)
+                            .orElse("12:30"); // par défaut midi
+
+                    String pauseFinStr = parametreRepository.findByCle("pause_fin")
+                            .map(Parametre::getValeur)
+                            .orElse("13:30"); // par défaut 13h
+
+                    LocalTime pauseDebut = LocalTime.parse(pauseDebutStr);
+                    LocalTime pauseFin = LocalTime.parse(pauseFinStr);
 
                     if (heureArrivee.isBefore(pauseDebut) && heureDepart.isAfter(pauseFin)) {
                         totalMinutes -= 60;
@@ -332,11 +375,12 @@ public class PointageService {
 
             totalHours = totalMinutes / 60;
             long remainingMinutes = totalMinutes % 60;
+            double REQUIRED_HOURS = getRequiredHours();
 
             if (conge != null) {
                 if ("CA".equals(conge.getType())) {
                     status = "Congé";
-                    totalHours = 9;
+                    totalHours = REQUIRED_HOURS;
                     remainingMinutes = 0;
                 } else if ("A".equals(conge.getType())) {
                     status = "Autorisation";
@@ -368,7 +412,4 @@ public class PointageService {
 
         return workHoursList;
     }
-
-
-
 }
