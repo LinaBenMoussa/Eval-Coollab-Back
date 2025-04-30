@@ -1,6 +1,5 @@
 package com.example.backend.dto.response;
 
-import com.example.backend.entity.Project;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
