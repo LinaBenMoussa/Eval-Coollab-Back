@@ -21,5 +21,8 @@ public interface IssueRepository extends JpaRepository<Issue, Long>, JpaSpecific
     @Query("SELECT i FROM Issue i WHERE i.date_echeance < :now AND i.status.is_closed != true AND i.isExpired = false")
     List<Issue> findNonExpiredIssues(LocalDateTime now);
 
+    long countByProjectId(Long projectId);
+
+
 }
 

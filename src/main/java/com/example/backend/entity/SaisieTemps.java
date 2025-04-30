@@ -38,7 +38,7 @@ public class SaisieTemps {
     private User collaborateur;
 
     @ManyToOne
-    @JoinColumn(name = "issue_id", nullable = false)
+    @JoinColumn(name = "issue_id", nullable = true)
     private Issue issue;
 
     @CreatedDate

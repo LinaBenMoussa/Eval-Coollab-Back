@@ -1,11 +1,9 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.response.IssueResponseDto;
+import com.example.backend.dto.response.IssueWithTimeEntryCountDto;
 import com.example.backend.entity.Issue;
 import com.example.backend.repository.IssueRepository;
-import com.example.backend.repository.ProjectRepository;
-import com.example.backend.repository.StatusRepository;
-import com.example.backend.repository.UserRepository;
 import com.example.backend.specification.IssueSpecifications;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,11 +20,7 @@ import java.util.Optional;
 public class IssueService {
     private final IssueRepository issueRepository;
 
-    private final UserRepository userRepository;
-
-    private final StatusRepository statusRepository;
-
-    private final ProjectRepository projectRepository;
+    private final SaisieTempsService saisieTempsService;
 
 
     public List<Issue> getIssuesByManagerId(Long managerId) {
@@ -39,6 +33,9 @@ public class IssueService {
 
     public List<Issue> getIssueByCollaborateurId(Long id){
         return issueRepository.findByCollaborateur_Id(id);
+    }
+    public long countByProjectId(Long projectId) {
+        return issueRepository.countByProjectId(projectId);
     }
 
     public IssueResponseDto getFilteredIssues(
@@ -56,22 +53,18 @@ public class IssueService {
 
         Specification<Issue> spec = Specification.where(null);
 
-        // Filtre par manager
         if (managerId != null) {
             spec = spec.and(IssueSpecifications.hasManagerId(managerId));
         }
 
-        // Filtre par collaborateur
         if (collaborateurId != null) {
             spec = spec.and(IssueSpecifications.hasCollaborateurId(collaborateurId));
         }
 
-        // Filtre par status
         if (status != null && !status.isEmpty()) {
             spec = spec.and(IssueSpecifications.hasStatus(status));
         }
 
-        // Filtres par dates
         if (startDateDebut != null && endDateDebut != null) {
             spec = spec.and(IssueSpecifications.isBetweenDatesDebut(
                     startDateDebut.atStartOfDay(),
@@ -90,14 +83,21 @@ public class IssueService {
                     endDateEcheance.atTime(23, 59, 59)));
         }
 
-        // Pagination et tri
-        int page = offset / limit;
-        Pageable pageable = PageRequest.of(page, limit);
+        Pageable pageable = PageRequest.of(offset / limit, limit);
 
         Page<Issue> result = issueRepository.findAll(spec, pageable);
 
-        return new IssueResponseDto(result.getContent(), result.getTotalElements());
-    }
+        List<IssueWithTimeEntryCountDto> enrichedIssues = result.getContent().stream()
+                .map(issue -> {
+                    long timeCount = saisieTempsService.countByIssueId(issue.getId());
+                    return new IssueWithTimeEntryCountDto(
+                            issue,
+                            timeCount
+                    );
+                })
+                .toList();
 
+        return new IssueResponseDto(enrichedIssues, result.getTotalElements());
+    }
 }
 

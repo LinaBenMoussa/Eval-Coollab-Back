@@ -39,6 +39,10 @@ public class SaisieTempsService {
     public List<SaisieTemps> getSaisieByManagerId(Long managerId) {
         return saisieTempsRepository.findByCollaborateur_ManagerId(managerId);
     }
+    public long countByIssueId(Long issueId) {
+        return saisieTempsRepository.countByIssueId(issueId);
+    }
+
 
     public void checkSaisieTemps(LocalDate date) {
         List<User> collaborateurs = userRepository.findByRole("Collaborateur");

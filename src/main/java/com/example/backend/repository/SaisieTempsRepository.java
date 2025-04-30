@@ -14,4 +14,7 @@ public interface SaisieTempsRepository extends JpaRepository<SaisieTemps, Long>,
     List<SaisieTemps> findByCollaborateur_ManagerId(Long managerId);
 
     List<SaisieTemps> findByCollaborateurAndDate(User collaborateur, LocalDate date);
+
+    long countByIssueId(Long issueId);
+
 }

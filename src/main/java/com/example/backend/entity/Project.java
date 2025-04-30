@@ -21,11 +21,11 @@ public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     @Column(length = 1000)
     private String description;
     private String identifier;
+    private int status;
 
     @CreatedDate
     private LocalDateTime createdDate;
