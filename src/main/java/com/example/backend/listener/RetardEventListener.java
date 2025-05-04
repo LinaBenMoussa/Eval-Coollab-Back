@@ -18,13 +18,13 @@ public class RetardEventListener {
     @EventListener
     public void handleRetard(RetardEvent event) {
         if (event.getCollaborateur().getId_bitrix24() != null) {
-            bitrixNotificationService.sendNotification(event.getCollaborateur().getId_bitrix24(), "vous etes en retard aujourd'hui ");
+            bitrixNotificationService.sendNotification(event.getCollaborateur().getId_bitrix24(), "vous êtes en retard aujourd'hui ");
         }
 
         String email = event.getCollaborateur().getEmail();
         if (email != null) {
             String subject = "Rappel : retard";
-            emailService.sendEmail("lina.b.moussa@gmail.com", subject, "vous étes en retard aujourd'hui");
+            emailService.sendEmail("lina.b.moussa@gmail.com", subject, "vous êtes en retard aujourd'hui");
         }
     }
 }

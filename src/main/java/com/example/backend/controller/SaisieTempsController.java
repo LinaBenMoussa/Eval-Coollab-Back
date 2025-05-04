@@ -32,9 +32,10 @@ public class SaisieTempsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) Long collaborateurId,
+            @RequestParam(required = false) Long issue,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit
     ) {
-        return saisieTempsService.getSaisiesByManagerId(managerId, startDate, endDate, collaborateurId, offset, limit);
+        return saisieTempsService.getSaisiesByManagerId(managerId, startDate, endDate, collaborateurId, issue, offset, limit);
     }
 }

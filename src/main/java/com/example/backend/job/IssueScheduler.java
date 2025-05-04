@@ -23,7 +23,6 @@ public class IssueScheduler {
         List<Issue> expiredIssues = issueRepository.findNonExpiredIssues(now);
 
         for (Issue issue : expiredIssues) {
-            System.out.println("Issue expirée trouvée : " + issue.getId());
             eventPublisher.publishEvent(new IssueExpiredEvent(issue));
 
             issue.setExpired(true);

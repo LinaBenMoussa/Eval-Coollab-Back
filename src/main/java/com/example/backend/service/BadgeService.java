@@ -55,7 +55,7 @@ public class BadgeService {
                 attribuerBadge(user, "Toujours à l'heure", mois);
             }
 
-            if (totalHoursMissing != null && totalHoursMissing <= 5) {
+            if (totalHoursMissing != null && totalHoursMissing <= 1) {
                 attribuerBadge(user, "Régulier", mois);
             }
 

@@ -27,6 +27,8 @@ public class Parametre {
     @Column(nullable = false)
     private String valeur;
 
+    private String nom;
+
     @CreatedDate
     private LocalDateTime createdDate;
 

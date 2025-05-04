@@ -65,7 +65,7 @@ public class EmployeeCardService {
             dto.setWorkedHours(getRequiredHours());
             dto.setLate(false);
             dto.setCompletedWorkDay(true);
-            dto.setRequiredHours(0.0); // Pas d'heures requises pour un jour férié
+            dto.setRequiredHours(getRequiredHours()); // On garde les heures requises normales pour info
             return dto;
         }
 
@@ -76,7 +76,6 @@ public class EmployeeCardService {
                     pointage.getHeure_depart()
             );
         }
-        dto.setWorkedHours(workedHours);
 
         LocalTime now = LocalTime.now();
         LocalTime cutoffTimeForArrival = getParametreAsLocalTime("heure_cutoff_arrivee", "17:00");
@@ -98,26 +97,43 @@ public class EmployeeCardService {
             dto.setStatus("A quitté");
         }
 
+        // Récupérer le congé s'il existe pour ce jour
         Conge conge = congeRepository.findByCollaborateurAndDateRange(
                 pointage.getCollaborateur().getMatricule(),
                 selectedDate
         );
+
+        // Initialiser les valeurs par défaut
+        dto.setCongeType(null);
+        dto.setDureeAutorisation(0);
+        dto.setDureeConge(0);
+
+        // Traitement des congés
         if (conge != null) {
-            dto.setCongeType(conge.getType().equals("CA") ? "En congé" : "Autorisation");
-            if ("Autorisation".equals(dto.getCongeType())) {
+            // Gestion du type de congé
+            if (conge.getType().equals("CA")) {
+                dto.setCongeType("En congé");
+                // Récupérer le nombre de jours de congé pour ce jour
+                double nbrJour = conge.getNbrjour();
+                double heuresConge = getRequiredHours() * nbrJour;
+                dto.setDureeConge(heuresConge);
+            } else {
+                dto.setCongeType("Autorisation");
+                // Calculer la durée de l'autorisation en heures
                 double dureeAutorisation = calculateDureeAutorisation(conge.getHeureDeb(), conge.getHeureFin());
                 dto.setDureeAutorisation(dureeAutorisation);
                 dto.setDeb_Autorisation(conge.getHeureDeb());
                 dto.setFin_Autorisation(conge.getHeureFin());
             }
-        } else {
-            dto.setCongeType(null);
-            dto.setDureeAutorisation(0);
         }
 
+        // Définir les heures travaillées
+        dto.setWorkedHours(workedHours);
         dto.setLate(isLate(pointage.getHeure_arrivee()));
-        dto.setCompletedWorkDay(hasCompletedWorkDay(pointage, dto.getCongeType(), dto.getDureeAutorisation()));
-        dto.setRequiredHours(calculateRequiredHours(dto.getCongeType(), dto.getDureeAutorisation()));
+        dto.setRequiredHours(getRequiredHours());
+
+        // Vérifier si la journée de travail est complétée
+        dto.setCompletedWorkDay(verifyCompletedWorkDay(workedHours, dto.getCongeType(), dto.getDureeConge(), dto.getDureeAutorisation()));
 
         return dto;
     }
@@ -136,39 +152,71 @@ public class EmployeeCardService {
             dto.setWorkedHours(getRequiredHours());
             dto.setLate(false);
             dto.setCompletedWorkDay(true);
-            dto.setRequiredHours(0.0); // Pas d'heures requises pour un jour férié
+            dto.setRequiredHours(getRequiredHours()); // On garde les heures requises normales pour info
             dto.setCongeType(null);
             dto.setDureeAutorisation(0);
+            dto.setDureeConge(0);
             return dto;
         }
 
-        dto.setStatus("Absent"); // Par défaut, marqué comme absent
+        dto.setStatus("Absent");
 
         Conge conge = congeRepository.findByCollaborateurAndDateRange(
                 collaborateur.getMatricule(),
                 selectedDate
         );
+
+        // Initialiser les valeurs par défaut
+        double workedHours = 0.0;
+        dto.setCongeType(null);
+        dto.setDureeAutorisation(0);
+        dto.setDureeConge(0);
+
+        // Traitement des congés
         if (conge != null) {
-            dto.setCongeType(conge.getType().equals("CA") ? "En congé" : "Autorisation");
-            dto.setStatus(dto.getCongeType()); // Mettre à jour le statut si en congé ou autorisation
-            if ("Autorisation".equals(dto.getCongeType())) {
-                // Calculer la durée de l'autorisation
+            // Gestion du type de congé
+            if (conge.getType().equals("CA")) {
+                dto.setCongeType("En congé");
+                double nbrJour = conge.getNbrjour();
+                dto.setDureeConge(getRequiredHours() * nbrJour);
+                dto.setStatus(dto.getCongeType());
+            } else {
+                dto.setCongeType("Autorisation");
+                dto.setStatus(dto.getCongeType());
                 double dureeAutorisation = calculateDureeAutorisation(conge.getHeureDeb(), conge.getHeureFin());
-                dto.setDureeAutorisation(dureeAutorisation); // Stocker la durée de l'autorisation
+                dto.setDureeAutorisation(dureeAutorisation);
                 dto.setDeb_Autorisation(conge.getHeureDeb());
                 dto.setFin_Autorisation(conge.getHeureFin());
             }
-        } else {
-            dto.setCongeType(null);
-            dto.setDureeAutorisation(0); // Pas d'autorisation, durée à 0
         }
-        dto.setWorkedHours(0.0);
 
+        dto.setWorkedHours(workedHours);
         dto.setLate(false);
-        dto.setCompletedWorkDay("En congé".equals(dto.getCongeType())); // Complété si en congé
-        dto.setRequiredHours(calculateRequiredHours(dto.getCongeType(), dto.getDureeAutorisation()));
+        dto.setRequiredHours(getRequiredHours()); // On garde les heures requises standard
+
+        // Vérifier si la journée de travail est complétée avec cette nouvelle méthode
+        dto.setCompletedWorkDay(verifyCompletedWorkDay(workedHours, dto.getCongeType(), dto.getDureeConge(), dto.getDureeAutorisation()));
 
         return dto;
+    }
+
+    /**
+     * Nouvelle méthode qui unifie la logique pour vérifier si une journée de travail est complétée
+     */
+    private boolean verifyCompletedWorkDay(double workedHours, String congeType, double dureeConge, double dureeAutorisation) {
+        double standardRequiredHours = getRequiredHours();
+
+        if ("En congé".equals(congeType)) {
+            return dureeConge >= standardRequiredHours;
+        }
+
+        double totalHeures = workedHours;
+        if ("Autorisation".equals(congeType)) {
+            totalHeures += dureeAutorisation;
+        }
+
+        // La journée est complétée si les heures totales atteignent ou dépassent les heures requises
+        return totalHeures >= standardRequiredHours;
     }
 
     private boolean isLate(LocalTime heureArrivee) {
@@ -179,25 +227,6 @@ public class EmployeeCardService {
         int margeRetard = getParametreAsInt("marge_retard", 10);
 
         return heureArrivee.isAfter(heureDebut.plusMinutes(margeRetard));
-    }
-
-    private boolean hasCompletedWorkDay(Pointage pointage, String congeType, double dureeAutorisation) {
-        if ("En congé".equals(congeType)) {
-            return true; // Journée complétée si en congé
-        }
-
-        if (pointage.getHeure_arrivee() == null || pointage.getHeure_depart() == null) {
-            return false;
-        }
-
-        // Calculer les heures travaillées en tenant compte de la pause déjeuner
-        double hoursWorked = calculateEffectiveWorkingHours(
-                pointage.getHeure_arrivee(),
-                pointage.getHeure_depart()
-        );
-
-        double requiredHours = calculateRequiredHours(congeType, dureeAutorisation);
-        return hoursWorked >= requiredHours;
     }
 
     private double calculateEffectiveWorkingHours(LocalTime heureArrivee, LocalTime heureDepart) {
@@ -231,18 +260,12 @@ public class EmployeeCardService {
         return Math.max(totalMinutes, 0);
     }
 
-    private double calculateRequiredHours(String congeType, double dureeAutorisation) {
-        if ("En congé".equals(congeType)) {
-            return 0; // Pas d'heures requises si en congé
+    private double calculateDureeAutorisation(LocalTime heureDeb, LocalTime heureFin) {
+        if (heureDeb == null || heureFin == null) {
+            return 0;
         }
-
-        double requiredHours = getRequiredHours();
-
-        if ("Autorisation".equals(congeType)) {
-            requiredHours -= dureeAutorisation;
-        }
-
-        return Math.max(requiredHours, 0);
+        double dureeMinutes = Duration.between(heureDeb, heureFin).toMinutes() / 60.0;
+        return dureeMinutes;
     }
 
     private double getRequiredHours() {
@@ -257,14 +280,6 @@ public class EmployeeCardService {
 
         // Retirer la durée de la pause déjeuner
         return heures - dureePauseDejeuner;
-    }
-
-    private double calculateDureeAutorisation(LocalTime heureDeb, LocalTime heureFin) {
-        if (heureDeb == null || heureFin == null) {
-            return 0;
-        }
-        double dureeMinutes = Duration.between(heureDeb, heureFin).toMinutes() / 60.0;
-        return dureeMinutes;
     }
 
     // Méthodes utilitaires pour récupérer les paramètres

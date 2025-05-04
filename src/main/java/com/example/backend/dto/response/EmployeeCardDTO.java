@@ -23,6 +23,7 @@ public class EmployeeCardDTO {
     private LocalTime deb_Autorisation;
     private LocalTime fin_Autorisation;
     private double workedHours;
+    private double dureeConge;
 
 
 }

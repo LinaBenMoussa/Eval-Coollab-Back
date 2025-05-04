@@ -6,11 +6,13 @@ import com.example.backend.entity.SaisieTemps;
 import com.example.backend.entity.User;
 import com.example.backend.repository.SaisieTempsRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.specification.IssueSpecifications;
 import com.example.backend.specification.SaisieTempsSpecifications;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -68,7 +70,7 @@ public class SaisieTempsService {
         }
     }
 
-    public ResponseSaisieTempsDto getSaisiesByManagerId(Long managerId, LocalDate startDate, LocalDate endDate, Long collaborateurId, int offset, int limit) {
+    public ResponseSaisieTempsDto getSaisiesByManagerId(Long managerId, LocalDate startDate, LocalDate endDate, Long collaborateurId, Long issue, int offset, int limit) {
         Specification<SaisieTemps> spec = Specification.where(null);
 
         if (managerId != null) {
@@ -83,7 +85,11 @@ public class SaisieTempsService {
             spec = spec.and(SaisieTempsSpecifications.hasCollaborateurId(collaborateurId));
         }
 
-        Pageable pageable = PageRequest.of(offset / limit, limit);
+        if (issue != null) {
+            spec = spec.and(SaisieTempsSpecifications.hasIssue(issue));
+        }
+
+        Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by(Sort.Direction.DESC, "date"));
 
         Page<SaisieTemps> result = saisieTempsRepository.findAll(spec, pageable);
 

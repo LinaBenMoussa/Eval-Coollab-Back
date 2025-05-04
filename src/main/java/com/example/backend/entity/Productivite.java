@@ -1,6 +1,5 @@
 package com.example.backend.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,9 +21,10 @@ public class Productivite {
 
     private int rang;
 
-    private int score;
+    private float score;
 
-    @ManyToOne
-    @JoinColumn(name = "collaborateur_id")
-    private User collaborateur;
+    private Long collaborateurId;
+    private String nom;
+    private String prenom;
+    private String periode;
 }

@@ -26,13 +26,17 @@ public class Issue {
     @Column(length = 2000)
     private String description;
 
-    private LocalDateTime date_debut;
+    @Column(name = "date_debut")
+    private LocalDateTime dateDebut;
 
-    private LocalDateTime date_fin;
+    @Column(name = "date_fin")
+    private LocalDateTime dateFin;
 
-    private LocalDateTime date_echeance;
+    @Column(name = "date_echeance")
+    private LocalDateTime dateEcheance;
 
-    private Double heures_estimees;
+    @Column(name = "heures_estimees")
+    private Double heuresEstimees;
 
     private String type;
 

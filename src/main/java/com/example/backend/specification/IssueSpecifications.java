@@ -23,24 +23,33 @@ public class IssueSpecifications {
     public static Specification<Issue> hasStatus(String status) {
         return (root, query, cb) -> {
             if (status == null || status.isEmpty()) {
-                return cb.isTrue(cb.literal(true)); // pas de filtre si status est null/vide
+                return cb.isTrue(cb.literal(true));
             }
             return cb.equal(root.get("status").get("name"), status);
         };
     }
 
+    public static Specification<Issue> hasProjet(String projet) {
+        return (root, query, cb) -> {
+            if (projet == null || projet.isEmpty()) {
+                return cb.isTrue(cb.literal(true));
+            }
+            return cb.equal(root.get("project").get("identifier"), projet);
+        };
+    }
+
     public static Specification<Issue> isBetweenDatesDebut(LocalDateTime start, LocalDateTime end) {
         return (root, query, cb) ->
-                cb.between(root.get("date_debut"), start, end);
+                cb.between(root.get("dateDebut"), start, end);
     }
 
     public static Specification<Issue> isBetweenDatesFin(LocalDateTime start, LocalDateTime end) {
         return (root, query, cb) ->
-                cb.between(root.get("date_fin"), start, end);
+                cb.between(root.get("dateFin"), start, end);
     }
 
     public static Specification<Issue> isBetweenDatesEcheance(LocalDateTime start, LocalDateTime end) {
         return (root, query, cb) ->
-                cb.between(root.get("date_echeance"), start, end);
+                cb.between(root.get("dateEcheance"), start, end);
     }
 }

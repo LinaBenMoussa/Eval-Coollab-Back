@@ -39,6 +39,7 @@ public class IssueController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDateEcheance,
             @RequestParam(required = false) Long collaborateurId,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String projet,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit) {
 
@@ -48,6 +49,7 @@ public class IssueController {
                 startDateFin, endDateFin,
                 startDateEcheance, endDateEcheance,
                 collaborateurId,
+                projet,
                 status,
                 offset, limit);
 

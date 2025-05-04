@@ -9,9 +9,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,8 +29,8 @@ public class IssueService {
         return issueRepository.findByCollaborateur_ManagerId(managerId);
     }
 
-    public Optional<Issue> getIssueById(Long id){
-       return issueRepository.findById(id);
+    public List<Issue> getIssueByCollaborateurAndPeriod(Long id, LocalDateTime startDate, LocalDateTime endDate){
+       return issueRepository.findByCollaborateurAndDateDebutBetween(id,startDate,endDate);
     }
 
     public List<Issue> getIssueByCollaborateurId(Long id){
@@ -47,6 +49,7 @@ public class IssueService {
             LocalDate startDateEcheance,
             LocalDate endDateEcheance,
             Long collaborateurId,
+            String projet,
             String status,
             int offset,
             int limit) {
@@ -63,6 +66,10 @@ public class IssueService {
 
         if (status != null && !status.isEmpty()) {
             spec = spec.and(IssueSpecifications.hasStatus(status));
+        }
+
+        if (projet != null && !projet.isEmpty()) {
+            spec = spec.and(IssueSpecifications.hasProjet(projet));
         }
 
         if (startDateDebut != null && endDateDebut != null) {
@@ -83,7 +90,7 @@ public class IssueService {
                     endDateEcheance.atTime(23, 59, 59)));
         }
 
-        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by(Sort.Direction.DESC, "dateDebut"));
 
         Page<Issue> result = issueRepository.findAll(spec, pageable);
 

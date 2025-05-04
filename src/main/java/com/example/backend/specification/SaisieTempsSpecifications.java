@@ -1,5 +1,6 @@
 package com.example.backend.specification;
 
+import com.example.backend.entity.Issue;
 import com.example.backend.entity.SaisieTemps;
 import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
@@ -11,6 +12,15 @@ public class SaisieTempsSpecifications {
                 return criteriaBuilder.isTrue(criteriaBuilder.literal(true));
             }
             return criteriaBuilder.equal(root.get("collaborateur").get("manager").get("id"), managerId);
+        };
+    }
+
+    public static Specification<SaisieTemps> hasIssue(Long issue) {
+        return (root, query, cb) -> {
+            if (issue == null) {
+                return cb.isTrue(cb.literal(true));
+            }
+            return cb.equal(root.get("issue").get("id"), issue);
         };
     }
 

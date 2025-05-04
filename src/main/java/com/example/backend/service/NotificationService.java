@@ -8,6 +8,7 @@ import com.example.backend.entity.User;
 import com.example.backend.repository.NotificationRepository;
 import com.example.backend.specification.NotificationSpecifications;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -82,7 +83,7 @@ public class NotificationService {
                     endDate.atTime(23, 59, 59)));
         }
         int page = offset / limit;
-        Pageable pageable = PageRequest.of(page, limit);
+        Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by(Sort.Direction.DESC, "dateEnvoi"));
 
         Page<Notification> result = notificationRepository.findAll(spec, pageable);
 

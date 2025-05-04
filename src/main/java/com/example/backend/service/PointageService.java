@@ -11,14 +11,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -157,7 +156,8 @@ public class PointageService {
 
         int page = offset / limit;
 
-        Pageable pageable = PageRequest.of(page, limit);
+        Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by(Sort.Direction.DESC, "date"));
+
 
         Page<Pointage> result = pointageRepository.findAll(spec, pageable);
 
@@ -306,107 +306,179 @@ public class PointageService {
 
         LocalDate currentDate = startDate;
         while (!currentDate.isAfter(endDate)) {
-            List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(
-                    matricule, currentDate
-            );
-
-            Conge conge = congeRepository.findByCollaborateurAndDateRange(matricule, currentDate);
-
+            // Initialize default values
             long totalMinutes = 0;
-            double totalHours = 0;
+            double workHours = 0;
             boolean hasPointage = false;
             String status = "Absent";
+            LocalTime heureArrivee = null;
+            LocalTime heureDepart = null;
 
-            // Vérifier si c'est un jour férié
+            // Variables pour stocker les informations d'autorisation et de congé
+            LocalTime autorisationDebut = null;
+            LocalTime autorisationFin = null;
+            double dureeConge = 0;
+
+            // Vérifier si c'est un jour férié ou un weekend
             if (joursFeriesService.estJourFerie(currentDate)) {
                 status = "Jour Férié";
-                totalHours = getRequiredHours();
+                workHours = getRequiredHours();
 
                 Map<String, Object> dayInfo = new HashMap<>();
                 dayInfo.put("date", currentDate);
-                dayInfo.put("hours", totalHours);
-                dayInfo.put("minutes", 0);
+                dayInfo.put("heureArrivee", heureArrivee);
+                dayInfo.put("heureDepart", heureDepart);
+                dayInfo.put("workHours", 0);
                 dayInfo.put("status", status);
-                workHoursList.add(dayInfo);
+                dayInfo.put("autorisationDebut", autorisationDebut);
+                dayInfo.put("autorisationFin", autorisationFin);
+                dayInfo.put("dureeConge", dureeConge);
 
+                workHoursList.add(dayInfo);
                 currentDate = currentDate.plusDays(1);
                 continue;
             }
 
-            for (Pointage pointage : pointages) {
-                LocalTime heureArrivee = pointage.getHeure_arrivee();
-                LocalTime heureDepart = pointage.getHeure_depart();
+            // Vérifier si c'est un weekend
+            DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+                status = "Weekend";
 
-                if (heureArrivee != null && heureDepart != null) {
-                    Duration duration = Duration.between(heureArrivee, heureDepart);
-                    totalMinutes += duration.toMinutes();
+                Map<String, Object> dayInfo = new HashMap<>();
+                dayInfo.put("date", currentDate);
+                dayInfo.put("heureArrivee", heureArrivee);
+                dayInfo.put("heureDepart", heureDepart);
+                dayInfo.put("workHours", 0);
+                dayInfo.put("status", status);
+                dayInfo.put("autorisationDebut", autorisationDebut);
+                dayInfo.put("autorisationFin", autorisationFin);
+                dayInfo.put("dureeConge", dureeConge);
 
-                    String pauseDebutStr = parametreRepository.findByCle("pause_debut")
-                            .map(Parametre::getValeur)
-                            .orElse("12:30"); // par défaut midi
-
-                    String pauseFinStr = parametreRepository.findByCle("pause_fin")
-                            .map(Parametre::getValeur)
-                            .orElse("13:30"); // par défaut 13h
-
-                    LocalTime pauseDebut = LocalTime.parse(pauseDebutStr);
-                    LocalTime pauseFin = LocalTime.parse(pauseFinStr);
-
-                    if (heureArrivee.isBefore(pauseDebut) && heureDepart.isAfter(pauseFin)) {
-                        totalMinutes -= 60;
-                    }
-                    else if (heureArrivee.isBefore(pauseDebut) && !heureDepart.isBefore(pauseDebut) && heureDepart.isBefore(pauseFin)) {
-                        totalMinutes -= Duration.between(pauseDebut, heureDepart).toMinutes();
-                    }
-                    else if (!heureArrivee.isAfter(pauseFin) && heureArrivee.isAfter(pauseDebut) && heureDepart.isAfter(pauseFin)) {
-                        totalMinutes -= Duration.between(heureArrivee, pauseFin).toMinutes();
-                    }
-                    else if (!heureArrivee.isBefore(pauseDebut) && !heureDepart.isAfter(pauseFin)) {
-                        totalMinutes -= duration.toMinutes();
-                    }
-
-                    hasPointage = true;
-                    status = "Présent";
-                } else if (heureArrivee != null) {
-                    status = "En poste";
-                    hasPointage = true;
-                }
+                workHoursList.add(dayInfo);
+                currentDate = currentDate.plusDays(1);
+                continue;
             }
 
-            totalHours = totalMinutes / 60;
-            long remainingMinutes = totalMinutes % 60;
-            double REQUIRED_HOURS = getRequiredHours();
+            // Récupérer les pointages pour ce jour
+            List<Pointage> pointages = pointageRepository.findByCollaborateur_MatriculeAndDate(
+                    matricule, currentDate
+            );
 
-            if (conge != null) {
-                if ("CA".equals(conge.getType())) {
-                    status = "Congé";
-                    totalHours = REQUIRED_HOURS;
-                    remainingMinutes = 0;
-                } else if ("A".equals(conge.getType())) {
-                    status = "Autorisation";
-                    if (hasPointage) {
-                        status = "Présent + Autorisation";
+            // Récupérer le congé pour ce jour
+            Conge conge = congeRepository.findByCollaborateurAndDateRange(matricule, currentDate);
+
+            // Récupérer les heures de pause
+            String pauseDebutStr = parametreRepository.findByCle("pause_debut")
+                    .map(Parametre::getValeur)
+                    .orElse("12:30"); // par défaut midi
+
+            String pauseFinStr = parametreRepository.findByCle("pause_fin")
+                    .map(Parametre::getValeur)
+                    .orElse("13:30"); // par défaut 13h
+
+            try {
+                LocalTime pauseDebut = LocalTime.parse(pauseDebutStr);
+                LocalTime pauseFin = LocalTime.parse(pauseFinStr);
+
+                // Traiter les pointages
+                for (Pointage pointage : pointages) {
+                    LocalTime pointageArrivee = pointage.getHeure_arrivee();
+                    LocalTime pointageDepart = pointage.getHeure_depart();
+
+                    // Garder trace du premier pointage d'arrivée et du dernier de départ pour l'affichage
+                    if (pointageArrivee != null) {
+                        if (heureArrivee == null || pointageArrivee.isBefore(heureArrivee)) {
+                            heureArrivee = pointageArrivee;
+                        }
                     }
 
-                    if (conge.getHeureDeb() != null && conge.getHeureFin() != null) {
-                        Duration autorisationDuration = Duration.between(conge.getHeureDeb(), conge.getHeureFin());
-                        long autorisationMinutes = autorisationDuration.toMinutes();
+                    if (pointageDepart != null) {
+                        if (heureDepart == null || pointageDepart.isAfter(heureDepart)) {
+                            heureDepart = pointageDepart;
+                        }
+                    }
 
-                        totalMinutes += autorisationMinutes;
-                        totalHours = totalMinutes / 60;
-                        remainingMinutes = totalMinutes % 60;
+                    if (pointageArrivee != null && pointageDepart != null) {
+                        Duration duration = Duration.between(pointageArrivee, pointageDepart);
+                        long pointageMinutes = duration.toMinutes();
+
+                        // Soustraire la pause si nécessaire
+                        if (pointageArrivee.isBefore(pauseDebut) && pointageDepart.isAfter(pauseFin)) {
+                            // La journée entière couvre la pause
+                            pointageMinutes -= Duration.between(pauseDebut, pauseFin).toMinutes();
+                        } else if (pointageArrivee.isBefore(pauseDebut) && pointageDepart.isAfter(pauseDebut) && pointageDepart.isBefore(pauseFin)) {
+                            // Départ pendant la pause
+                            pointageMinutes -= Duration.between(pauseDebut, pointageDepart).toMinutes();
+                        } else if (pointageArrivee.isAfter(pauseDebut) && pointageArrivee.isBefore(pauseFin) && pointageDepart.isAfter(pauseFin)) {
+                            // Arrivée pendant la pause
+                            pointageMinutes -= Duration.between(pointageArrivee, pauseFin).toMinutes();
+                        } else if (pointageArrivee.isAfter(pauseDebut) && pointageDepart.isBefore(pauseFin)) {
+                            // Entièrement pendant la pause
+                            pointageMinutes = 0; // Pas de temps de travail valide
+                        }
+
+                        totalMinutes += pointageMinutes;
+                        hasPointage = true;
+                        status = "Présent";
+                    } else if (pointageArrivee != null) {
+                        status = "En poste";
+                        hasPointage = true;
                     }
                 }
+
+                // Traitement des congés
+                if (conge != null) {
+                    if ("CA".equals(conge.getType())) {
+                        if (hasPointage) {
+                            status = "Présent + Congé";
+                            // Pour un congé partiel, calculer la durée proportionnelle
+                            dureeConge = (conge.getNbrjour() < 1.0) ?
+                                    conge.getNbrjour() * getRequiredHours() :
+                                    getRequiredHours();
+                        } else {
+                            status = "Congé";
+                            dureeConge = getRequiredHours(); // Un jour complet
+                            // Pour un congé complet, ajuster les heures de travail
+                            totalMinutes += dureeConge * 60; // Convertir heures en minutes
+                        }
+                    } else if ("A".equals(conge.getType())) {
+                        if (hasPointage) {
+                            status = "Présent + Autorisation";
+                        } else {
+                            status = "Autorisation";
+                        }
+
+                        // Récupérer les heures de début et fin d'autorisation
+                        autorisationDebut = conge.getHeureDeb();
+                        autorisationFin = conge.getHeureFin();
+
+                        if (autorisationDebut != null && autorisationFin != null) {
+                            Duration autorisationDuration = Duration.between(autorisationDebut, autorisationFin);
+                            long autorisationMinutes = autorisationDuration.toMinutes();
+                            totalMinutes += autorisationMinutes; // Ajouter les minutes d'autorisation au total
+                        }
+                    }
+                }
+
+                // Convertir les minutes totales en heures avec précision à 2 décimales
+                workHours = Math.round((totalMinutes / 60.0) * 100.0) / 100.0;
+
+            } catch (DateTimeParseException e) {
+                // Gestion des erreurs de parsing
+                status += " (Erreur)";
             }
 
             Map<String, Object> dayInfo = new HashMap<>();
             dayInfo.put("date", currentDate);
-            dayInfo.put("hours", totalHours);
-            dayInfo.put("minutes", remainingMinutes);
+            dayInfo.put("heureArrivee", heureArrivee);
+            dayInfo.put("heureDepart", heureDepart);
+            dayInfo.put("workHours", workHours);
             dayInfo.put("status", status);
+            dayInfo.put("autorisationDebut", autorisationDebut);
+            dayInfo.put("autorisationFin", autorisationFin);
+            dayInfo.put("dureeConge", dureeConge);
 
             workHoursList.add(dayInfo);
-
             currentDate = currentDate.plusDays(1);
         }
 

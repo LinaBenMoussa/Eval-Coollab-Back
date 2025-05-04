@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.entity.Issue;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
@@ -10,14 +11,14 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 
 import java.sql.Types;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 public class CollaborateurStatsService {
-
+    private final IssueService issueService;
     private final JdbcTemplate jdbcTemplate;
 
     public Map<String, Object> getCollaborateurStats(Long collaborateurId, Date startDate, Date endDate, String periodType) {
@@ -107,5 +108,23 @@ public class CollaborateurStatsService {
         );
 
         monthlyProductivityCall.execute(params);
+    }
+    public Map<String, Double> getStatsForCollaborateur(Long collaborateurId, LocalDateTime startDate, LocalDateTime endDate){
+        List<Issue> issues=issueService.getIssueByCollaborateurAndPeriod(collaborateurId, startDate, endDate);
+
+        Set<Long> statusTermines = Set.of(5L, 8L, 9L, 10L, 16L, 17L);
+
+        long totalTerminees = issues.stream()
+                .filter(issue -> issue.getStatus() != null && statusTermines.contains(issue.getStatus().getId()))
+                .count();
+
+        long totalEnCours = issues.size() - totalTerminees;
+
+        Map<String, Double> stats = new HashMap<>();
+        stats.put("tachesTerminees", (double) totalTerminees);
+        stats.put("tachesEnCours", (double) totalEnCours);
+
+        return stats;
+
     }
 }
