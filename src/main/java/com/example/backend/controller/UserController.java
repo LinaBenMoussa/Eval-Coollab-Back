@@ -33,7 +33,7 @@ public class UserController {
     }
     @PutMapping
     public User updateUser(@RequestBody CreateUserRequestDto user) {
-        return userService.editUser(user.getId(),user.getNom(), user.getPrenom(),user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId(), user.getId_bitrix24(), user.getId_redmine());
+        return userService.editUser(user.getId(),user.getNom(), user.getPrenom(),user.getEmail(), user.getUsername() ,user.getPassword(),user.getRole(),user.getManagerId(), user.getId_bitrix24(), user.getId_redmine());
     }
     @GetMapping("/byrole/{role}")
     public List<User> getCollaborators(@PathVariable String role) {

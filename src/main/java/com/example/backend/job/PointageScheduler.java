@@ -17,7 +17,7 @@ public class PointageScheduler {
         LocalDate day = LocalDate.now().minusDays(1);;
         pointageService.checkWorkHoursForAllCollaborateurs(day);
     }
-    @Scheduled(cron = "0 0 10,16 * * *")
+    @Scheduled(cron = "0 30 10 * * ?")
     public void checkIsLate() {
         LocalDate day = LocalDate.now();
         pointageService.checkIsLate(day);
