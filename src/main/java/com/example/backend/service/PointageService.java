@@ -452,11 +452,6 @@ public class PointageService {
                         autorisationDebut = conge.getHeureDeb();
                         autorisationFin = conge.getHeureFin();
 
-                        if (autorisationDebut != null && autorisationFin != null) {
-                            Duration autorisationDuration = Duration.between(autorisationDebut, autorisationFin);
-                            long autorisationMinutes = autorisationDuration.toMinutes();
-                            totalMinutes += autorisationMinutes; // Ajouter les minutes d'autorisation au total
-                        }
                     }
                 }
 
