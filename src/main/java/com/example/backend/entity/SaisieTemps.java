@@ -38,7 +38,10 @@ public class SaisieTemps {
     private User collaborateur;
 
     @ManyToOne
-    @JoinColumn(name = "issue_id")
+    @JoinColumn(
+            name = "issue_id",
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
+    )
     private Issue issue;
 
     @CreatedDate

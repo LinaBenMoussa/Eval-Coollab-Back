@@ -41,7 +41,8 @@ public class Issue {
     private String type;
 
     @ManyToOne
-    @JoinColumn(name = "collaborateur_id")
+    @JoinColumn(name = "collaborateur_id",
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private User collaborateur;
 
     @ManyToOne

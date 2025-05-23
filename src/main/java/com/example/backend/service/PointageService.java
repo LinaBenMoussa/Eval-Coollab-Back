@@ -104,7 +104,7 @@ public class PointageService {
 
             if (totalHoursWorked < requiredHoursAdjusted) {
                 String message = String.format(
-                        "Vous n'avez pas atteint vos heures quotidiennes pour le %s. Heures travaillées : %d/%d",
+                        "Vous n'avez pas atteint vos heures quotidiennes pour le %s. Heures travaillées : %d/%.2f",
                         date, totalHoursWorked, requiredHoursAdjusted
                 );
 
@@ -188,7 +188,7 @@ public class PointageService {
         if (request.getHeure_arrivee() != null && request.getHeure_depart() == null) {
             pointage.setStatus("En poste");
         } else if (request.getHeure_arrivee() != null && request.getHeure_depart() != null) {
-            pointage.setStatus("A quité");
+            pointage.setStatus("A quitté");
         }
 
         return pointageRepository.save(pointage);
@@ -300,7 +300,6 @@ public class PointageService {
             }
         }
     }
-
     public List<Map<String, Object>> calculateWorkHoursByPeriod(String matricule, LocalDate startDate, LocalDate endDate) {
         List<Map<String, Object>> workHoursList = new ArrayList<>();
 
@@ -309,6 +308,7 @@ public class PointageService {
             // Initialize default values
             long totalMinutes = 0;
             double workHours = 0;
+            double totalHoursIncludingLeave = 0; // Nouvelle variable pour inclure congés, autorisations et jours fériés
             boolean hasPointage = false;
             String status = "Absent";
             LocalTime heureArrivee = null;
@@ -322,13 +322,15 @@ public class PointageService {
             // Vérifier si c'est un jour férié ou un weekend
             if (joursFeriesService.estJourFerie(currentDate)) {
                 status = "Jour Férié";
-                workHours = getRequiredHours();
+                workHours = 0; // Pas d'heures travaillées réellement
+                totalHoursIncludingLeave = getRequiredHours(); // Mais comptées dans le total avec congés
 
                 Map<String, Object> dayInfo = new HashMap<>();
                 dayInfo.put("date", currentDate);
                 dayInfo.put("heureArrivee", heureArrivee);
                 dayInfo.put("heureDepart", heureDepart);
-                dayInfo.put("workHours", 0);
+                dayInfo.put("workHours", workHours);
+                dayInfo.put("totalHoursIncludingLeave", totalHoursIncludingLeave);
                 dayInfo.put("status", status);
                 dayInfo.put("autorisationDebut", autorisationDebut);
                 dayInfo.put("autorisationFin", autorisationFin);
@@ -343,12 +345,15 @@ public class PointageService {
             DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
             if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
                 status = "Weekend";
+                workHours = 0;
+                totalHoursIncludingLeave = 0; // Weekend reste à 0 dans les deux cas
 
                 Map<String, Object> dayInfo = new HashMap<>();
                 dayInfo.put("date", currentDate);
                 dayInfo.put("heureArrivee", heureArrivee);
                 dayInfo.put("heureDepart", heureDepart);
-                dayInfo.put("workHours", 0);
+                dayInfo.put("workHours", workHours);
+                dayInfo.put("totalHoursIncludingLeave", totalHoursIncludingLeave);
                 dayInfo.put("status", status);
                 dayInfo.put("autorisationDebut", autorisationDebut);
                 dayInfo.put("autorisationFin", autorisationFin);
@@ -438,8 +443,6 @@ public class PointageService {
                         } else {
                             status = "Congé";
                             dureeConge = getRequiredHours(); // Un jour complet
-                            // Pour un congé complet, ajuster les heures de travail
-                            totalMinutes += dureeConge * 60; // Convertir heures en minutes
                         }
                     } else if ("A".equals(conge.getType())) {
                         if (hasPointage) {
@@ -451,12 +454,31 @@ public class PointageService {
                         // Récupérer les heures de début et fin d'autorisation
                         autorisationDebut = conge.getHeureDeb();
                         autorisationFin = conge.getHeureFin();
-
                     }
                 }
 
                 // Convertir les minutes totales en heures avec précision à 2 décimales
                 workHours = Math.round((totalMinutes / 60.0) * 100.0) / 100.0;
+
+                // Calculer le total incluant les congés et autorisations
+                totalHoursIncludingLeave = workHours;
+
+                // Ajouter les heures de congé
+                if (conge != null && "CA".equals(conge.getType())) {
+                    totalHoursIncludingLeave += dureeConge;
+                }
+
+                // Ajouter les heures d'autorisation
+                if (conge != null && "A".equals(conge.getType())) {
+                    if (autorisationDebut != null && autorisationFin != null) {
+                        Duration autorisationDuration = Duration.between(autorisationDebut, autorisationFin);
+                        double autorisationHours = Math.round((autorisationDuration.toMinutes() / 60.0) * 100.0) / 100.0;
+                        totalHoursIncludingLeave += autorisationHours;
+                    } else {
+                        // Si les heures ne sont pas spécifiées, considérer comme une journée complète
+                        totalHoursIncludingLeave += getRequiredHours();
+                    }
+                }
 
             } catch (DateTimeParseException e) {
                 // Gestion des erreurs de parsing
@@ -468,6 +490,7 @@ public class PointageService {
             dayInfo.put("heureArrivee", heureArrivee);
             dayInfo.put("heureDepart", heureDepart);
             dayInfo.put("workHours", workHours);
+            dayInfo.put("totalHoursIncludingLeave", totalHoursIncludingLeave);
             dayInfo.put("status", status);
             dayInfo.put("autorisationDebut", autorisationDebut);
             dayInfo.put("autorisationFin", autorisationFin);
